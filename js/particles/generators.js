@@ -36,7 +36,9 @@ window.SpiralGalaxy.Generators = class Generators {
       const armOffset = (armIndex / cfg.arms) * Math.PI * 2;
       const arm = armsData[armIndex];
 
-      const rr = Math.pow(Math.random(), 0.7) * cfg.maxRadius;
+      // arms emanate from the ends of the bar, not from the exact center
+      const barEnd = cfg.maxRadius * 0.26;
+      const rr = barEnd + Math.pow(Math.random(), 0.7) * (cfg.maxRadius - barEnd);
 
       const twist = rr * (cfg.armTwist / cfg.maxRadius) * Math.PI * 2;
       const wobble =
@@ -92,6 +94,124 @@ window.SpiralGalaxy.Generators = class Generators {
     };
   }
 
+  diskHaze() {
+    const cfg = this._cfg.galaxy;
+    const { rand, gauss } = this._random;
+
+    return () => {
+      const rr = Math.pow(Math.random(), 0.75) * cfg.maxRadius;
+      const angle = rand(0, Math.PI * 2);
+      const warp = cfg.diskWarp * Math.pow(rr / cfg.maxRadius, 2.2) * Math.sin(angle + 1.7);
+      const wobble = Math.sin(rr * 0.05) * 2.4 + Math.sin(rr * 0.011) * 3.4;
+      const thickness = gauss() * (4 + rr * cfg.diskFlare * 1.6);
+      const y = warp + wobble + thickness;
+
+      const t = Math.min(1, rr / cfg.maxRadius);
+      const colorT = Math.max(0, t + rand(-0.14, 0.16));
+      const [baseR, baseG, baseB] = this._ramp.compute(colorT, false);
+
+      const warmth = Math.sin(rr * 0.02 + 2.0);
+      let cr = baseR, cg = baseG, cb = baseB;
+      if (warmth > 0) { cr *= 1.12; cg *= 1.03; cb *= 0.8; }
+      else { cr *= 0.82; cg *= 1.05; cb *= 1.2; }
+
+      // very even & faint: tiny variance in dim/size so the layer reads as smooth smoke
+      const dim = rand(0.42, 0.55) * (1 - 0.18 * t);
+      const size = rand(2.6, 3.4) * (1.35 - 0.4 * t);
+
+      return {
+        x: Math.cos(angle) * rr,
+        y: y,
+        z: Math.sin(angle) * rr,
+        r: cr * dim, g: cg * dim, b: cb * dim,
+        size,
+        phase: rand(0, Math.PI * 2)
+      };
+    };
+  }
+
+  armGlow() {
+    const cfg = this._cfg.galaxy;
+    const { rand, gauss } = this._random;
+
+    const tints = [
+      [1.35, 0.9, 1.5],
+      [0.95, 1.05, 1.6],
+      [1.5, 1.05, 0.95],
+      [1.4, 0.8, 1.2]
+    ];
+
+    const segs = [];
+    for (let a = 0; a < cfg.arms; a++) {
+      const armOffset = (a / cfg.arms) * Math.PI * 2;
+      const segCount = 7;
+      for (let s = 0; s < segCount; s++) {
+        const r0 = ((s + 0.5) / segCount) * cfg.maxRadius;
+        const bright = Math.random() < 0.3;
+        segs.push({
+          armOffset,
+          rr: r0,
+          tint: tints[Math.floor(Math.random() * tints.length)],
+          glow: bright ? 1.5 : 1.0
+        });
+      }
+    }
+
+    return () => {
+      const seg = segs[Math.floor(Math.random() * segs.length)];
+      const rr = Math.max(6, seg.rr + gauss() * 12);
+      const twist = rr * (cfg.armTwist / cfg.maxRadius) * Math.PI * 2;
+      const wobble = Math.sin(rr * 0.012 + seg.armOffset * 1.7) * 0.4 +
+        Math.sin(rr * 0.027 + seg.armOffset * 3.1) * 0.2;
+      const angle = seg.armOffset + twist + wobble + gauss() * 0.12;
+
+      const warp = cfg.diskWarp * Math.pow(rr / cfg.maxRadius, 2.2) * Math.sin(angle + seg.armOffset * 1.4);
+      const y = warp + gauss() * (3 + rr * cfg.diskFlare);
+
+      const cap = (x) => x > 1 ? 1 : x;
+      const boost = seg.glow * rand(0.9, 1.15);
+      const size = rand(5.5, 8.5) * (1.15 - 0.45 * (rr / cfg.maxRadius)) * (seg.glow > 1 ? 1.25 : 1);
+
+      return {
+        x: Math.cos(angle) * rr,
+        y: y,
+        z: Math.sin(angle) * rr,
+        r: cap(seg.tint[0] * boost), g: cap(seg.tint[1] * boost), b: cap(seg.tint[2] * boost),
+        size,
+        phase: rand(0, Math.PI * 2)
+      };
+    };
+  }
+
+  bar() {
+    const cfg = this._cfg.galaxy;
+    const { rand, gauss } = this._random;
+    const halfLen = cfg.maxRadius * 0.36;
+
+    return () => {
+      const bx = gauss() * halfLen;
+      const bz = gauss() * (halfLen * 0.16 + 5);
+      const by = gauss() * (halfLen * 0.11 + 4) * 1.5;
+      const dist = Math.abs(bx) / halfLen;
+
+      const t = rand(0, 0.5);
+      const [cr, cg, cb] = this._ramp.compute(t, true);
+      const density = 1 + 0.32 * (1 - 0.55 * dist);
+      const size = rand(1.3, 2.5) * (1.5 - 0.5 * dist);
+
+      const cap = (x) => x > 1 ? 1 : x;
+
+      return {
+        x: bx,
+        y: by,
+        z: bz,
+        r: cap(cr * density), g: cap(cg * density), b: cap(cb * density),
+        size,
+        phase: rand(0, Math.PI * 2)
+      };
+    };
+  }
+
   core() {
     const { rand, gauss } = this._random;
 
@@ -107,7 +227,7 @@ window.SpiralGalaxy.Generators = class Generators {
     return () => {
       const rr = Math.pow(Math.random(), 2.0) * 52;
       const angle = rand(0, Math.PI * 2);
-      const thickness = gauss() * (rr * 0.45 + 3);
+      const thickness = gauss() * (rr * 0.68 + 5.5);
       const colorT = Math.min(0.55, (rr / 52) * 0.55);
       const [cr, cg, cb] = this._ramp.compute(colorT, true);
 
