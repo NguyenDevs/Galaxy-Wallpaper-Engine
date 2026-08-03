@@ -1,7 +1,7 @@
 window.SpiralGalaxy = window.SpiralGalaxy || {};
 
 window.SpiralGalaxy.OrbitControls = class OrbitControls {
-  constructor({ element, camera, target, limits, initial, sensitivity, inertia, offset, drag, zoom }) {
+  constructor({ element, camera, target, limits, initial, sensitivity, inertia, offset, drag }) {
     this._element = element;
     this._camera = camera;
     this._target = target || new THREE.Vector3();
