@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Spiral Galaxy — Three.js Particle Field</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+  canvas { display: block; }
+  #hint {
+    position: fixed;
+    left: 18px;
+    bottom: 16px;
+    color: rgba(180, 190, 220, 0.35);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    user-select: none;
+  }
+  #loading {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    color: rgba(200,210,255,0.6);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 1px;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<div id="loading">đang dựng thiên hà…</div>
+<div id="hint">kéo chuột để xoay góc nhìn · cuộn để zoom</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script src="js/config.js"></script>
+<script src="js/core/random.js"></script>
+<script src="js/core/colorRamp.js"></script>
+<script src="js/core/engine.js"></script>
+<script src="js/particles/spriteTexture.js"></script>
+<script src="js/particles/pointsFactory.js"></script>
+<script src="js/particles/generators.js"></script>
+<script src="js/effects/nebulaField.js"></script>
+<script src="js/controls/orbitControls.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+  window.SpiralGalaxy.create();
+  document.getElementById('loading').style.display = 'none';
+</script>
+</body>
+</html>
