@@ -110,5 +110,7 @@ window.SpiralGalaxy.NebulaField = (() => {
     }
   }
 
+  NebulaField.makeTexture = makeTexture;
+
   return NebulaField;
 })();
