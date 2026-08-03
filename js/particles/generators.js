@@ -207,17 +207,18 @@ window.SpiralGalaxy.Generators = class Generators {
     const maxRadius = this._cfg.galaxy.maxRadius;
 
     return () => {
-      const rr = rand(maxRadius * 0.4, maxRadius * 1.6);
+      // dark matter halo: density falls off with radius, roughly spherical, extends past the disk
+      const rr = Math.pow(Math.random(), 1.5) * (maxRadius * 2.1);
       const angle = rand(0, Math.PI * 2);
-      const thickness = gauss() * rr * 0.5;
-      const tint = rand(0.8, 1.05);
+      const thickness = gauss() * (rr * 0.6 + maxRadius * 0.15);
+      const tint = rand(0.85, 1.1);
 
       return {
         x: Math.cos(angle) * rr,
         y: thickness,
         z: Math.sin(angle) * rr,
-        r: 0.75 * tint, g: 0.82 * tint, b: 1.0 * tint,
-        size: rand(0.3, 0.9),
+        r: 0.7 * tint, g: 0.78 * tint, b: 1.0 * tint,
+        size: rand(0.7, 1.6),
         phase: rand(0, Math.PI * 2)
       };
     };
