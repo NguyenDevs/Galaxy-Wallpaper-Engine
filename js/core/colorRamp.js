@@ -2,15 +2,15 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
 
 window.SpiralGalaxy.ColorRamp = class ColorRamp {
   constructor() {
-    // Galaxy disk: cool blue-white core -> red HII band -> sea-teal (young stars) -> cyan-blue -> deep sea blue rim
+    // Galaxy disk: cool blue-white core -> red HII band -> sea blue (young stars) -> deep ocean blue rim
     this._galaxyStops = [
       [0.0, 250, 244, 255],
       [0.12, 200, 220, 255],
       [0.26, 255, 150, 180],
-      [0.44, 120, 205, 235],
-      [0.64, 60, 170, 240],
-      [0.85, 40, 140, 245],
-      [1.0, 30, 115, 245]
+      [0.44, 90, 170, 245],
+      [0.64, 50, 140, 250],
+      [0.85, 40, 120, 250],
+      [1.0, 30, 100, 250]
     ];
     // Golden bulge palette: white -> ivory -> pale gold -> yellow-orange -> orange (old stars, dense)
     this._coreStops = [
