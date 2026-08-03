@@ -98,7 +98,8 @@ window.SpiralGalaxy.create = function create() {
     element: engine.renderer.domElement,
     camera: engine.camera,
     limits: Config.camera.limits,
-    initial: Config.camera.start
+    initial: Config.camera.start,
+    inertia: Config.controls
   });
 
   const clock = new THREE.Clock();
