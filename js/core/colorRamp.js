@@ -2,26 +2,47 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
 
 window.SpiralGalaxy.ColorRamp = class ColorRamp {
   constructor() {
+    // Vivid galaxy palette: warm ivory core -> hot pink -> magenta -> violet -> electric blue
     this._galaxyStops = [
-      [0.0, 255, 190, 235],
-      [0.2, 230, 165, 255],
-      [0.45, 150, 155, 255],
-      [0.7, 95, 175, 255],
-      [1.0, 70, 115, 235]
+      [0.0, 255, 240, 232],
+      [0.12, 255, 205, 232],
+      [0.26, 255, 172, 255],
+      [0.42, 228, 152, 255],
+      [0.58, 178, 152, 255],
+      [0.76, 130, 200, 255],
+      [1.0, 82, 132, 255]
     ];
+    // Golden warm core palette
     this._coreStops = [
-      [0.0, 255, 246, 240],
-      [0.35, 255, 218, 170],
-      [0.7, 255, 175, 140],
-      [1.0, 255, 140, 175]
+      [0.0, 255, 254, 250],
+      [0.22, 255, 228, 190],
+      [0.5, 255, 186, 142],
+      [0.78, 255, 150, 180],
+      [1.0, 255, 128, 210]
     ];
+    this._vibrance = 1.18;
   }
 
   compute(t, core) {
     t = Math.max(0, Math.min(1, t));
     const stops = core ? this._coreStops : this._galaxyStops;
-    const [r, g, b] = this._sample(stops, t);
-    return [r / 255, g / 255, b / 255];
+    let [r, g, b] = this._sample(stops, t);
+    r /= 255; g /= 255; b /= 255;
+
+    // Saturation / vibrance boost around the luminance axis
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const v = this._vibrance;
+    r = lum + (r - lum) * v;
+    g = lum + (g - lum) * v;
+    b = lum + (b - lum) * v;
+
+    // Gentle lift so midtones don't fall too dark
+    const lift = 1.04;
+    return [
+      Math.min(1, r * lift),
+      Math.min(1, g * lift),
+      Math.min(1, b * lift)
+    ];
   }
 
   _sample(stops, t) {
