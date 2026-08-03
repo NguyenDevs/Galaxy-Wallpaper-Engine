@@ -164,10 +164,6 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     el.addEventListener('mousedown', this._onPointerDown);
     window.addEventListener('mouseup', this._onPointerUp);
     window.addEventListener('mousemove', this._onPointerMove);
-    // Bind wheel on window (not the canvas) with preventDefault so the embedded
-    // browser (Lively/CefSharp) actually forwards wheel input that it would
-    // otherwise swallow as page scroll.
-    window.addEventListener('wheel', this._onWheel, { passive: false });
     el.addEventListener('touchstart', this._onTouchStart, { passive: true });
     el.addEventListener('touchmove', this._onTouchMove, { passive: true });
     el.addEventListener('touchend', this._onTouchEnd, { passive: true });
