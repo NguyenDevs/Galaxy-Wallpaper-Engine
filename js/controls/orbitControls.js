@@ -9,6 +9,11 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     this._sensitivity = sensitivity || { orbit: 0.004, zoom: 0.4, touchOrbit: 0.006 };
     this._inertia = inertia || { enabled: false, damping: 0.08, stopSpeed: 0.0004, blendMs: 45 };
     this._offset = offset || 0;
+    if (this._offset) {
+      // shift the orbit/zoom pivot to the LEFT of the galaxy (in world units),
+      // so the galaxy sits offset right and zoom focuses on a point left of it
+      this._target.x -= Math.abs(this._offset);
+    }
 
     this.azimuth = initial.azimuth;
     this.elevation = initial.elevation;
@@ -42,9 +47,6 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
       this.radius * c * Math.cos(this.azimuth) + this._target.z
     );
     this._camera.lookAt(this._target);
-    // offset the camera to the left (proportional to zoom) so the galaxy sits
-    // off-center to the right, like ND-Wallpaper-Engine's core view
-    this._camera.position.x -= this.radius * this._offset;
   }
 
   _trackVelocity(aVel, eVel) {
