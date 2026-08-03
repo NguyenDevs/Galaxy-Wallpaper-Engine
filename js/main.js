@@ -39,7 +39,6 @@ window.SpiralGalaxy.create = function create() {
 
   addPoints(galaxy, { ...P.disk, generator: generators.disk() });
   addPoints(galaxy, { ...P.diskHaze, generator: generators.diskHaze() });
-  addPoints(galaxy, { ...P.armGlow, generator: generators.armGlow() });
   addPoints(galaxy, { ...P.bar, generator: generators.bar() });
   addPoints(galaxy, { ...P.core, generator: generators.core() });
 
