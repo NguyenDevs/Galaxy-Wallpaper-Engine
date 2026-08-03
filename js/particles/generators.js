@@ -130,59 +130,6 @@ window.SpiralGalaxy.Generators = class Generators {
     };
   }
 
-  armGlow() {
-    const cfg = this._cfg.galaxy;
-    const { rand, gauss } = this._random;
-
-    const tints = [
-      [1.35, 0.9, 1.5],
-      [0.95, 1.05, 1.6],
-      [1.5, 1.05, 0.95],
-      [1.4, 0.8, 1.2]
-    ];
-
-    const segs = [];
-    for (let a = 0; a < cfg.arms; a++) {
-      const armOffset = (a / cfg.arms) * Math.PI * 2;
-      const segCount = 7;
-      for (let s = 0; s < segCount; s++) {
-        const r0 = ((s + 0.5) / segCount) * cfg.maxRadius;
-        const bright = Math.random() < 0.3;
-        segs.push({
-          armOffset,
-          rr: r0,
-          tint: tints[Math.floor(Math.random() * tints.length)],
-          glow: bright ? 1.5 : 1.0
-        });
-      }
-    }
-
-    return () => {
-      const seg = segs[Math.floor(Math.random() * segs.length)];
-      const rr = Math.max(6, seg.rr + gauss() * 12);
-      const twist = rr * (cfg.armTwist / cfg.maxRadius) * Math.PI * 2;
-      const wobble = Math.sin(rr * 0.012 + seg.armOffset * 1.7) * 0.4 +
-        Math.sin(rr * 0.027 + seg.armOffset * 3.1) * 0.2;
-      const angle = seg.armOffset + twist + wobble + gauss() * 0.12;
-
-      const warp = cfg.diskWarp * Math.pow(rr / cfg.maxRadius, 2.2) * Math.sin(angle + seg.armOffset * 1.4);
-      const y = warp + gauss() * (3 + rr * cfg.diskFlare);
-
-      const cap = (x) => x > 1 ? 1 : x;
-      const boost = seg.glow * rand(0.9, 1.15);
-      const size = rand(5.5, 8.5) * (1.15 - 0.45 * (rr / cfg.maxRadius)) * (seg.glow > 1 ? 1.25 : 1);
-
-      return {
-        x: Math.cos(angle) * rr,
-        y: y,
-        z: Math.sin(angle) * rr,
-        r: cap(seg.tint[0] * boost), g: cap(seg.tint[1] * boost), b: cap(seg.tint[2] * boost),
-        size,
-        phase: rand(0, Math.PI * 2)
-      };
-    };
-  }
-
   bar() {
     const cfg = this._cfg.galaxy;
     const { rand, gauss } = this._random;
@@ -406,8 +353,11 @@ window.SpiralGalaxy.Generators = class Generators {
           tiltX: rand(0, Math.PI),
           tiltY: rand(0, Math.PI),
           base: rand(0, Math.PI * 2),
+          barAngle: rand(0, Math.PI),
           scatter: isDwarf ? rand(0.5, 0.7) : rand(0.08, 0.18),
-          bulge: isDwarf ? 0.7 : 0.22,
+          bulge: isDwarf ? 0.7 : 0.2,
+          barFrac: isDwarf ? 0 : rand(0.16, 0.24),
+          armFrac: isDwarf ? 0 : rand(0.5, 0.62),
           dwarf: isDwarf,
           spin: isDwarf ? rand(0.1, 0.25) : rand(0.5, 1.0),
           bright: rand(0.85, 1.3),
@@ -425,35 +375,106 @@ window.SpiralGalaxy.Generators = class Generators {
 
   bgGalaxy(g) {
     const { rand, gauss } = this._random;
+    const cap = (x) => x > 1 ? 1 : x;
 
     return () => {
-      let rr, ang;
       const r = Math.random();
-      if (r < g.bulge) {
-        rr = Math.pow(Math.random(), 2.0) * g.core;
-        ang = rand(0, Math.PI * 2);
-      } else if (g.arms > 0) {
-        const arm = Math.floor(rand(0, g.arms));
-        rr = Math.pow(Math.random(), 0.9) * g.scale;
-        ang = g.base + arm * ((Math.PI * 2) / g.arms) +
-          (rr / g.scale) * g.wind * Math.PI * 2 +
-          gauss() * g.scatter * (0.6 + rr / g.scale);
-      } else {
-        rr = Math.pow(Math.random(), 1.4) * g.scale;
-        ang = rand(0, Math.PI * 2);
+
+      if (g.dwarf) {
+        // smooth dwarf spheroid: gold core -> dim blue rim, no structure
+        const rr = Math.pow(Math.random(), 2.0) * g.scale;
+        const ang = rand(0, Math.PI * 2);
+        const t = Math.min(1, rr / g.scale);
+        const [pr, pg, pb] = this._ramp.compute(t, false);
+        const fall = (1 - t * 0.65) * g.bright * rand(0.85, 1.2);
+        return {
+          x: Math.cos(ang) * rr,
+          y: gauss() * (rr * 0.55 + g.core * 0.8),
+          z: Math.sin(ang) * rr,
+          r: cap(pr * fall), g: cap(pg * fall), b: cap(pb * fall),
+          size: rand(1.3, 2.5),
+          phase: rand(0, Math.PI * 2)
+        };
       }
 
-      const lx = Math.cos(ang) * rr;
-      const lz = Math.sin(ang) * rr;
-      const ly = (Math.random() - 0.5) * (rr * 0.3 + g.core * 0.6);
+      const barHalf = g.scale * 0.3;
 
-      const dim = g.dwarf ? rand(0.8, 1.0) * g.bright : rand(0.9, 1.2) * g.bright;
-      const cap = (x) => x > 1 ? 1 : x;
+      if (r < g.bulge) {
+        // bulge: dense warm gold / ivory stars, puffy core
+        const rr = Math.pow(Math.random(), 2.2) * g.core;
+        const ang = rand(0, Math.PI * 2);
+        const [pr, pg, pb] = this._ramp.compute(rand(0, 0.38), true);
+        const boost = rand(1.0, 1.35) * g.bright;
+        return {
+          x: Math.cos(ang) * rr,
+          y: gauss() * (rr * 0.7 + g.core * 0.7),
+          z: Math.sin(ang) * rr,
+          r: cap(pr * boost), g: cap(pg * boost), b: cap(pb * boost),
+          size: rand(1.4, 2.7),
+          phase: rand(0, Math.PI * 2)
+        };
+      }
+
+      if (r < g.bulge + g.barFrac) {
+        // bar: elongated cigar of gold stars along barAngle
+        const bx = gauss() * barHalf;
+        const bz = gauss() * (barHalf * 0.18 + g.core * 0.35);
+        const by = gauss() * (barHalf * 0.22 + g.core * 0.45);
+        const c = Math.cos(g.barAngle), s = Math.sin(g.barAngle);
+        const [pr, pg, pb] = this._ramp.compute(rand(0, 0.48), true);
+        const fall = (1 - Math.abs(bx) / barHalf * 0.4) * g.bright * rand(0.95, 1.2);
+        return {
+          x: bx * c - bz * s, y: by, z: bx * s + bz * c,
+          r: cap(pr * fall), g: cap(pg * fall), b: cap(pb * fall),
+          size: rand(1.3, 2.5),
+          phase: rand(0, Math.PI * 2)
+        };
+      }
+
+      // disk: stars from bar end outward; arms = young blue + pink HII, gaps = dim blue / dust
+      const rim = Math.pow(Math.random(), 0.8);
+      const rr = barHalf + rim * (g.scale - barHalf);
+      const t = Math.min(1, rr / g.scale);
+      const fall = (1 - t * 0.6) * g.bright;
+      const j = rand(0.82, 1.18);
+      let ang, mx, my, mb;
+
+      if (Math.random() < g.armFrac) {
+        // inside a spiral arm
+        const arm = Math.floor(rand(0, g.arms));
+        ang = g.base + arm * ((Math.PI * 2) / g.arms) +
+          (rr / g.scale) * g.wind * Math.PI * 2 +
+          gauss() * g.scatter * (0.6 + t) * 0.5;
+        const [pr, pg, pb] = this._ramp.compute(t, false);
+        if (Math.random() < 0.35) {
+          // HII region: hot pink/red young cluster
+          mx = pr * 1.45; my = pg * 0.8; mb = pb * 1.15;
+        } else {
+          // normal arm star: blue, cool shift
+          mx = pr * 0.95; my = pg * 1.05; mb = pb * 1.25;
+        }
+        ang += gauss() * g.scatter;
+      } else if (Math.random() < 0.3) {
+        // dust lane between arms: near-dark warm dust stars that dim the gap
+        const arm = Math.floor(rand(0, g.arms));
+        ang = g.base + arm * ((Math.PI * 2) / g.arms) +
+          (rr / g.scale) * g.wind * Math.PI * 2 +
+          gauss() * g.scatter * (0.9 + t);
+        const [pr, pg, pb] = this._ramp.compute(t, false);
+        mx = pr * 0.35; my = pg * 0.32; mb = pb * 0.4;
+      } else {
+        // inter-arm field: faint blue disk
+        ang = rand(0, Math.PI * 2);
+        const [pr, pg, pb] = this._ramp.compute(t, false);
+        mx = pr * 0.75; my = pg * 0.8; mb = pb * 0.95;
+      }
 
       return {
-        x: lx, y: ly, z: lz,
-        r: cap(g.color[0] * dim), g: cap(g.color[1] * dim), b: cap(g.color[2] * dim),
-        size: rand(1.4, 2.8),
+        x: Math.cos(ang) * rr,
+        y: gauss() * (rr * 0.26 + g.core * 0.5),
+        z: Math.sin(ang) * rr,
+        r: cap(mx * fall * j), g: cap(my * fall * j), b: cap(mb * fall * j),
+        size: rand(1.2, 2.6),
         phase: rand(0, Math.PI * 2)
       };
     };
