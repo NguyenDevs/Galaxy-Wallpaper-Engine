@@ -10,7 +10,6 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     this._inertia = inertia || { enabled: false, damping: 0.08, stopSpeed: 0.0004, blendMs: 45 };
     this._offset = offset || 0;
     this._dragEnabled = drag !== undefined ? !!drag : true;
-    this._zoomEnabled = zoom !== undefined ? !!zoom : true;
     if (this._offset) {
       // shift the orbit/zoom pivot to the LEFT of the galaxy (in world units),
       // so the galaxy sits offset right and zoom focuses on a point left of it
@@ -133,12 +132,6 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
       this._trackVelocity(-dx * sens.orbit * 1000 / dt, dy * sens.orbit * 1000 / dt);
       this.apply();
     };
-    this._onWheel = (e) => {
-      if (!this._zoomEnabled) return;
-      this._stopInertia();
-      this.radius += e.deltaY * sens.zoom;
-      this.apply();
-    };
     this._onTouchStart = (e) => {
       if (!this._dragEnabled) return;
       this._stopInertia();
@@ -171,7 +164,10 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     el.addEventListener('mousedown', this._onPointerDown);
     window.addEventListener('mouseup', this._onPointerUp);
     window.addEventListener('mousemove', this._onPointerMove);
-    el.addEventListener('wheel', this._onWheel, { passive: true });
+    // Bind wheel on window (not the canvas) with preventDefault so the embedded
+    // browser (Lively/CefSharp) actually forwards wheel input that it would
+    // otherwise swallow as page scroll.
+    window.addEventListener('wheel', this._onWheel, { passive: false });
     el.addEventListener('touchstart', this._onTouchStart, { passive: true });
     el.addEventListener('touchmove', this._onTouchMove, { passive: true });
     el.addEventListener('touchend', this._onTouchEnd, { passive: true });
@@ -191,7 +187,7 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     el.removeEventListener('mousedown', this._onPointerDown);
     window.removeEventListener('mouseup', this._onPointerUp);
     window.removeEventListener('mousemove', this._onPointerMove);
-    el.removeEventListener('wheel', this._onWheel);
+    window.removeEventListener('wheel', this._onWheel);
     el.removeEventListener('touchstart', this._onTouchStart);
     el.removeEventListener('touchmove', this._onTouchMove);
     el.removeEventListener('touchend', this._onTouchEnd);
