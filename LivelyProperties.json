@@ -226,11 +226,6 @@
     "text": "Follow Mouse (hold & drag to rotate)",
     "value": true
   },
-  "mousezoom": {
-    "type": "checkbox",
-    "text": "Mouse Wheel Zoom",
-    "value": true
-  },
   "bloomradius": {
     "type": "slider",
     "text": "Bloom Radius (%)",
