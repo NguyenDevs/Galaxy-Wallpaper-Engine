@@ -24,10 +24,10 @@ window.SpiralGalaxy.Config = {
   },
 
   controls: {
-    inertia: true,
-    damping: 0.08,
-    stopSpeed: 0.0004,
-    blendMs: 45
+    enabled: true,
+    damping: 0.1,
+    stopSpeed: 0.015,
+    blendMs: 70
   },
 
   galaxy: {
