@@ -308,10 +308,10 @@ window.SpiralGalaxy.Generators = class Generators {
 
       const lx = Math.cos(ang) * rr;
       const lz = Math.sin(ang) * rr;
-      const ly = (rand() - 0.5) * (rr * 0.4 + g.core);
+      const ly = (Math.random() - 0.5) * (rr * 0.4 + g.core);
       const [ox, oy, oz] = this._rotateLocal(lx, ly, lz, g.tiltX, g.tiltY);
 
-      const dim = g.dwarf ? rand(0.75, 0.95) : rand(0.85, 1.15);
+      const dim = g.dwarf ? rand(0.8, 1.0) : rand(0.9, 1.2);
       const cap = (x) => x > 1 ? 1 : x;
 
       return {
@@ -319,7 +319,7 @@ window.SpiralGalaxy.Generators = class Generators {
         y: g.y + oy,
         z: g.z + oz,
         r: cap(g.color[0] * dim), g: cap(g.color[1] * dim), b: cap(g.color[2] * dim),
-        size: rand(1.1, 2.2),
+        size: rand(1.4, 2.6),
         phase: rand(0, Math.PI * 2)
       };
     };
@@ -330,14 +330,14 @@ window.SpiralGalaxy.Generators = class Generators {
     const galaxies = this._bgList();
     const blobs = [];
     for (const g of galaxies) {
-      const n = 3;
-      for (let i = 0; i < n; i++) {
-        const off = g.scale * 0.5;
+      const n = 5;
+for (let i = 0; i < n; i++) {
+        const off = g.scale * 0.35;
         blobs.push({
-          x: g.x + (rand() - 0.5) * off,
-          y: g.y + (rand() - 0.5) * off,
-          z: g.z + (rand() - 0.5) * off,
-          size: rand(1.7, 3.4) * (0.6 + g.scale / 40),
+          x: g.x + (Math.random() - 0.5) * off,
+          y: g.y + (Math.random() - 0.5) * off,
+          z: g.z + (Math.random() - 0.5) * off,
+          size: rand(3.5, 6.0) * (0.5 + g.scale / 80),
           color: g.color,
           dwarf: g.dwarf
         });
@@ -346,7 +346,7 @@ window.SpiralGalaxy.Generators = class Generators {
 
     return () => {
       const b = blobs[Math.floor(Math.random() * blobs.length)];
-      const dim = b.dwarf ? 0.65 : rand(0.8, 1.0);
+      const dim = b.dwarf ? 0.8 : rand(0.95, 1.15);
       const cap = (x) => x > 1 ? 1 : x;
       return {
         x: b.x,
