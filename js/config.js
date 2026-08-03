@@ -71,7 +71,7 @@ window.SpiralGalaxy.Config = {
   coreGlow: {
     size: 240,
     opacity: 0.9,
-    color: 0xffe6c4
+    color: 0xffb4be
   },
 
   galaxyDust: {
