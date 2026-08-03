@@ -69,4 +69,25 @@ window.SpiralGalaxy.Engine = class Engine {
       this.renderer.render(this.scene, this.camera);
     }
   }
+
+  dispose() {
+    window.removeEventListener('resize', this._onResize);
+
+    this.scene.traverse((o) => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) {
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (const m of mats) {
+          if (m.map) m.map.dispose();
+          m.dispose();
+        }
+      }
+    });
+
+    if (this._composer && this._composer.dispose) this._composer.dispose();
+    this.renderer.dispose();
+    if (this.renderer.domElement && this.renderer.domElement.parentNode) {
+      this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
+    }
+  }
 };
