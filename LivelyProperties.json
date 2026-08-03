@@ -1,0 +1,242 @@
+{
+  "labelClock": {
+    "type": "label",
+    "value": "CLOCK"
+  },
+  "clockenable": {
+    "type": "checkbox",
+    "text": "Enable Clock",
+    "value": true
+  },
+  "clockmode": {
+    "type": "dropdown",
+    "text": "Display Mode",
+    "value": 0,
+    "items": [
+      "Birth / Elapsed Time",
+      "Current Time"
+    ]
+  },
+  "birthdate": {
+    "type": "textbox",
+    "text": "Birth Date",
+    "value": "1999-10-26T22:45:00+07:00"
+  },
+  "clockoffsetx": {
+    "type": "slider",
+    "text": "Horizontal Position (%)",
+    "value": 4,
+    "min": 0,
+    "max": 100,
+    "step": 0.5
+  },
+  "clockoffsety": {
+    "type": "slider",
+    "text": "Vertical Position (%)",
+    "value": 50,
+    "min": 0,
+    "max": 100,
+    "step": 0.5
+  },
+  "clockscale": {
+    "type": "slider",
+    "text": "Scale (%)",
+    "value": 100,
+    "min": 50,
+    "max": 200,
+    "step": 1
+  },
+  "clockblur": {
+    "type": "slider",
+    "text": "Background Blur (px)",
+    "value": 10,
+    "min": 0,
+    "max": 40,
+    "step": 1
+  },
+  "clockbgopacity": {
+    "type": "slider",
+    "text": "Background Opacity (%)",
+    "value": 40,
+    "min": 0,
+    "max": 100,
+    "step": 1
+  },
+  "clocktextcolor": {
+    "type": "color",
+    "text": "Text Color",
+    "value": "#ffffff"
+  },
+  "clockaccentcolor": {
+    "type": "color",
+    "text": "Accent Color",
+    "value": "#2f86d6"
+  },
+  "labelTexts": {
+    "type": "label",
+    "value": "CLOCK LABELS"
+  },
+  "timerlabeltop": {
+    "type": "textbox",
+    "text": "Top Label",
+    "value": "Yến Uyên đã tham gia server Trái Đất"
+  },
+  "timertotallabel": {
+    "type": "textbox",
+    "text": "Total Seconds Label",
+    "value": "TỔNG SỐ GIÂY ĐÃ CHƠI"
+  },
+  "yearlabeltext": {
+    "type": "textbox",
+    "text": "Year Label",
+    "value": "Năm thứ"
+  },
+  "currenttimelabel": {
+    "type": "textbox",
+    "text": "Current Time Label",
+    "value": "Current Time"
+  },
+  "dayprogresslabel": {
+    "type": "textbox",
+    "text": "Day Progress Label",
+    "value": "% ngày hôm nay"
+  },
+  "label_year": {
+    "type": "textbox",
+    "text": "Unit: Year",
+    "value": "Năm"
+  },
+  "label_month": {
+    "type": "textbox",
+    "text": "Unit: Month",
+    "value": "Tháng"
+  },
+  "label_day": {
+    "type": "textbox",
+    "text": "Unit: Day",
+    "value": "Ngày"
+  },
+  "label_hour": {
+    "type": "textbox",
+    "text": "Unit: Hour",
+    "value": "Giờ"
+  },
+  "label_minute": {
+    "type": "textbox",
+    "text": "Unit: Minute",
+    "value": "Phút"
+  },
+  "label_second": {
+    "type": "textbox",
+    "text": "Unit: Second",
+    "value": "Giây"
+  },
+  "labelGalaxy": {
+    "type": "label",
+    "value": "GALAXY"
+  },
+  "galaxycolor": {
+    "type": "color",
+    "text": "Galaxy Color (Tint)",
+    "value": "#ffffff"
+  },
+  "galaxytintbg": {
+    "type": "checkbox",
+    "text": "Tint Background Stars",
+    "value": false
+  },
+  "galaxybrightness": {
+    "type": "slider",
+    "text": "Brightness (%)",
+    "value": 100,
+    "min": 0,
+    "max": 300,
+    "step": 1
+  },
+  "galaxyzoom": {
+    "type": "slider",
+    "text": "Zoom (Camera Distance)",
+    "value": 660,
+    "min": 220,
+    "max": 1400,
+    "step": 5
+  },
+  "galaxyposx": {
+    "type": "slider",
+    "text": "Horizontal Position",
+    "value": 0,
+    "min": -300,
+    "max": 300,
+    "step": 5
+  },
+  "galaxyposy": {
+    "type": "slider",
+    "text": "Vertical Position",
+    "value": 0,
+    "min": -300,
+    "max": 300,
+    "step": 5
+  },
+  "galaxysize": {
+    "type": "slider",
+    "text": "Galaxy Size (%)",
+    "value": 108,
+    "min": 30,
+    "max": 200,
+    "step": 1
+  },
+  "rotationspeed": {
+    "type": "slider",
+    "text": "Rotation Speed (%)",
+    "value": 100,
+    "min": 0,
+    "max": 300,
+    "step": 1
+  },
+  "particleamount": {
+    "type": "slider",
+    "text": "Particle Amount (%)",
+    "value": 100,
+    "min": 10,
+    "max": 300,
+    "step": 5
+  },
+  "particlesize": {
+    "type": "slider",
+    "text": "Particle Size (%)",
+    "value": 100,
+    "min": 20,
+    "max": 300,
+    "step": 1
+  },
+  "bloomstrength": {
+    "type": "slider",
+    "text": "Bloom Strength (%)",
+    "value": 100,
+    "min": 0,
+    "max": 300,
+    "step": 1
+  },
+  "labelInteraction": {
+    "type": "label",
+    "value": "MOUSE & INTERACTION"
+  },
+  "mousefollow": {
+    "type": "checkbox",
+    "text": "Follow Mouse (hold & drag to rotate)",
+    "value": true
+  },
+  "mousezoom": {
+    "type": "checkbox",
+    "text": "Mouse Wheel Zoom",
+    "value": true
+  },
+  "bloomradius": {
+    "type": "slider",
+    "text": "Bloom Radius (%)",
+    "value": 100,
+    "min": 0,
+    "max": 200,
+    "step": 1
+  }
+}
