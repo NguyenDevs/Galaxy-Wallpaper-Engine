@@ -37,7 +37,8 @@ window.SpiralGalaxy.PointsFactory = class PointsFactory {
         uSizeBase: { value: sizeBase },
         uPixelRatio: { value: this._pixelRatio },
         uTime: { value: 0 },
-        uTwinkle: { value: twinkle }
+        uTwinkle: { value: twinkle },
+        uTint: { value: new THREE.Color(1, 1, 1) }
       },
       vertexShader: `
         attribute float aSize;
@@ -47,11 +48,12 @@ window.SpiralGalaxy.PointsFactory = class PointsFactory {
         uniform float uPixelRatio;
         uniform float uTime;
         uniform float uTwinkle;
+        uniform vec3 uTint;
         void main() {
           float s1 = sin(uTime * 2.6 + aPhase);
           float s2 = sin(uTime * 5.1 + aPhase * 2.3);
           float tw = 1.0 + uTwinkle * (0.62 * s1 * s1 * s1 + 0.38 * s2);
-          vColor = color * tw;
+          vColor = color * uTint * tw;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           float dist = -mvPosition.z;
           gl_PointSize = aSize * uSizeBase * uPixelRatio * (320.0 / dist);
