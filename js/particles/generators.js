@@ -11,11 +11,16 @@ window.SpiralGalaxy.Generators = class Generators {
     const cfg = this._cfg.galaxy;
     const { rand, gauss } = this._random;
 
-    const hotTints = [
-      [1.7, 1.05, 1.3],
-      [0.95, 1.15, 1.6],
-      [1.7, 1.15, 0.8],
-      [1.5, 0.9, 1.05]
+    // warm young-cluster palette: red, pink, red-pink, yellow-orange, orange...
+    const warmPalette = [
+      [1.0, 0.32, 0.38],
+      [1.0, 0.55, 0.62],
+      [1.0, 0.42, 0.55],
+      [1.0, 0.68, 0.22],
+      [1.0, 0.58, 0.18],
+      [1.0, 0.5, 0.5],
+      [1.0, 0.75, 0.28],
+      [0.95, 0.62, 0.4]
     ];
 
     const armsData = [];
@@ -24,11 +29,22 @@ window.SpiralGalaxy.Generators = class Generators {
       for (let k = 0; k < 7; k++) {
         knots.push({
           r: Math.pow(Math.random(), 0.7) * cfg.maxRadius,
-          width: rand(16, 44),
-          tint: hotTints[Math.floor(Math.random() * hotTints.length)]
+          width: rand(16, 44)
         });
       }
-      armsData.push({ knots });
+      // clusters of warm-colored stars embedded along the arm
+      const clusters = [];
+      const numClusters = 6;
+      for (let c = 0; c < numClusters; c++) {
+        clusters.push({
+          r: Math.pow(Math.random(), 0.55) * cfg.maxRadius,
+          dAngle: rand(-0.65, 0.65),
+          spreadR: rand(10, 30),
+          spreadA: rand(0.07, 0.24),
+          tint: warmPalette[Math.floor(Math.random() * warmPalette.length)]
+        });
+      }
+      armsData.push({ knots, clusters });
     }
 
     return () => {
@@ -40,10 +56,12 @@ window.SpiralGalaxy.Generators = class Generators {
       const barEnd = cfg.maxRadius * 0.26;
       const rr = barEnd + Math.pow(Math.random(), 0.7) * (cfg.maxRadius - barEnd);
 
-      const twist = rr * (cfg.armTwist / cfg.maxRadius) * Math.PI * 2;
-      const wobble =
-        Math.sin(rr * 0.012 + armIndex * 2.1) * 0.35 +
-        Math.sin(rr * 0.027 + armIndex * 4.7) * 0.18;
+      const twistAt = (rrr) => rrr * (cfg.armTwist / cfg.maxRadius) * Math.PI * 2;
+      const wobbleAt = (rrr) =>
+        Math.sin(rrr * 0.012 + armIndex * 2.1) * 0.35 +
+        Math.sin(rrr * 0.027 + armIndex * 4.7) * 0.18;
+      const twist = twistAt(rr);
+      const wobble = wobbleAt(rr);
       const scatter = 0.12 + (rr / cfg.maxRadius) * 0.32;
       const angle = armOffset + twist + wobble + gauss() * scatter;
 
@@ -63,21 +81,40 @@ window.SpiralGalaxy.Generators = class Generators {
       if (warmth > 0) { cr *= 1.15; cg *= 1.05; cb *= 0.78; }
       else { cr *= 0.82; cg *= 1.06; cb *= 1.2; }
 
+      // warm-cluster influence: nearby particles inherit the cluster's warm color
+      let warm = 0;
+      let warmTint = [1, 1, 1];
+      for (const c of arm.clusters) {
+        const dr = Math.abs(rr - c.r);
+        if (dr < c.spreadR) {
+          const cAngle = armOffset + twistAt(c.r) + wobbleAt(c.r) + c.dAngle;
+          let dA = angle - cAngle;
+          dA = Math.atan2(Math.sin(dA), Math.cos(dA));
+          const w = (1 - dr / c.spreadR) * Math.max(0, 1 - Math.abs(dA) / c.spreadA);
+          if (w > warm) { warm = w; warmTint = c.tint; }
+        }
+      }
+
       let knotBoost = 0;
-      let knotTint = [1, 1, 1];
       for (const k of arm.knots) {
         const d = Math.abs(rr - k.r);
         if (d < k.width) {
           const w = 1 - d / k.width;
-          if (w > knotBoost) { knotBoost = w; knotTint = k.tint; }
+          if (w > knotBoost) knotBoost = w;
         }
       }
       const knotW = knotBoost * knotBoost;
       const brightness = 1 + knotW * 1.15 + 0.3 * (1 - r / cfg.maxRadius);
-      const tColor = Math.random() < knotW
-        ? knotTint
-        : [rand(0.94, 1.07), rand(0.94, 1.07), rand(0.94, 1.07)];
-      const size = rand(0.7, 1.8) * (1 - 0.22 * (r / cfg.maxRadius)) * (1 + knotW * 1.0);
+      const tColor = [rand(0.94, 1.07), rand(0.94, 1.07), rand(0.94, 1.07)];
+
+      // blend base arm color toward the warm cluster color when close to a cluster
+      const warmB = 0.85 + warm * 0.4;
+      const warmBright = rand(0.75, 1.2);
+      let fr = cr * (1 - warm) + warmTint[0] * warmBright * warmB;
+      let fg = cg * (1 - warm) + warmTint[1] * warmBright * warmB;
+      let fb = cb * (1 - warm) + warmTint[2] * warmBright * warmB;
+
+      const size = rand(0.7, 1.8) * (1 - 0.22 * (r / cfg.maxRadius)) * (1 + knotW * 1.0) * (1 + warm * 0.8);
 
       const cap = (x) => x > 1 ? 1 : x;
 
@@ -85,9 +122,9 @@ window.SpiralGalaxy.Generators = class Generators {
         x: Math.cos(angle) * r,
         y: y,
         z: Math.sin(angle) * r,
-        r: cap(cr * tColor[0] * brightness),
-        g: cap(cg * tColor[1] * brightness),
-        b: cap(cb * tColor[2] * brightness),
+        r: cap(fr * tColor[0] * brightness),
+        g: cap(fg * tColor[1] * brightness),
+        b: cap(fb * tColor[2] * brightness),
         size,
         phase: rand(0, Math.PI * 2)
       };
