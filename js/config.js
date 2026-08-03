@@ -42,9 +42,13 @@ window.SpiralGalaxy.Config = {
     halo:       { count: 5000,  sizeBase: 1.6, opacity: 0.5,  twinkle: 0.35 },
     companion:  { count: 1200,  sizeBase: 2.2, opacity: 0.6,  twinkle: 0.1 },
     background: { count: 4000,  sizeBase: 2.2, opacity: 1.0,  twinkle: 0.5 },
-    bgGalaxies: { count: 9000,  sizeBase: 4.5, opacity: 1.0,  twinkle: 0.08 },
-    bgGlow:     { count: 70,    sizeBase: 11,  opacity: 0.6,  twinkle: 0 },
+    bgGalaxies: { count: 900,   sizeBase: 4.5, opacity: 1.0,  twinkle: 0.08 },
+    bgGlow:     { count: 6,     sizeBase: 11,  opacity: 0.5,  twinkle: 0 },
     fgStars:    { count: 1000,  sizeBase: 4.0, opacity: 1.0,  twinkle: 0.8 }
+  },
+
+  bgSpin: {
+    speed: 0.02
   },
 
   companion: {
