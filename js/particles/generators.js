@@ -239,38 +239,59 @@ window.SpiralGalaxy.Generators = class Generators {
   _bgList() {
     if (!this._bgListData) {
       const { rand } = this._random;
-      const galColors = [
-        [1.0, 0.86, 0.96],
-        [0.93, 0.85, 1.05],
-        [0.84, 0.9, 1.05],
-        [0.96, 0.9, 1.0],
-        [0.86, 0.96, 1.03],
-        [1.0, 0.9, 0.86]
+      const galPalettes = [
+        [1.25, 0.62, 1.15],
+        [0.82, 0.7, 1.3],
+        [0.62, 0.9, 1.3],
+        [0.6, 1.2, 1.15],
+        [1.3, 0.95, 0.55],
+        [1.3, 0.55, 0.8],
+        [0.7, 1.05, 1.3],
+        [1.2, 0.75, 1.0],
+        [0.85, 1.25, 0.7],
+        [1.05, 0.65, 1.3]
       ];
 
       const galaxies = [];
-      const N = 14;
+      const N = 16;
+      const MIN_SEP = 330;
       for (let i = 0; i < N; i++) {
-        const radius = rand(700, 1250);
-        const theta = rand(0, Math.PI * 2);
-        const phi = Math.acos(rand(-1, 1));
-        const isDwarf = Math.random() < 0.22;
+        const isDwarf = Math.random() < 0.25;
+        const pal = galPalettes[Math.floor(Math.random() * galPalettes.length)];
+        const jitter = (v) => Math.min(1.45, v * rand(0.88, 1.2));
+
+        let x, y, z, accepted = false;
+        for (let attempt = 0; attempt < 24 && !accepted; attempt++) {
+          const radius = rand(800, 1850);
+          const theta = rand(0, Math.PI * 2);
+          const phi = Math.acos(rand(-1, 1));
+          x = radius * Math.sin(phi) * Math.cos(theta);
+          y = radius * Math.cos(phi);
+          z = radius * Math.sin(phi) * Math.sin(theta);
+          accepted = true;
+          for (const other of galaxies) {
+            if (Math.hypot(x - other.x, y - other.y, z - other.z) < MIN_SEP) {
+              accepted = false;
+              break;
+            }
+          }
+        }
+
         galaxies.push({
-          x: radius * Math.sin(phi) * Math.cos(theta),
-          y: radius * Math.cos(phi),
-          z: radius * Math.sin(phi) * Math.sin(theta),
-          scale: isDwarf ? rand(20, 36) : rand(45, 90),
-          core: isDwarf ? rand(3, 5) : rand(6, 12),
+          x, y, z,
+          scale: isDwarf ? rand(16, 48) : rand(35, 115),
+          core: isDwarf ? rand(2.5, 4.5) : rand(5, 14),
           arms: isDwarf ? 0 : 2 + Math.floor(Math.random() * 2),
-          wind: isDwarf ? 0 : rand(0.7, 1.1),
+          wind: isDwarf ? 0 : rand(0.7, 1.2),
           tiltX: rand(0, Math.PI),
           tiltY: rand(0, Math.PI),
           base: rand(0, Math.PI * 2),
-          scatter: isDwarf ? rand(0.5, 0.7) : rand(0.08, 0.16),
-          bulge: isDwarf ? 0.7 : 0.25,
+          scatter: isDwarf ? rand(0.5, 0.7) : rand(0.08, 0.18),
+          bulge: isDwarf ? 0.7 : 0.22,
           dwarf: isDwarf,
           spin: isDwarf ? rand(0.1, 0.25) : rand(0.5, 1.0),
-          color: galColors[Math.floor(Math.random() * galColors.length)]
+          bright: rand(0.85, 1.3),
+          color: [jitter(pal[0]), jitter(pal[1]), jitter(pal[2])]
         });
       }
       this._bgListData = galaxies;
@@ -306,7 +327,7 @@ window.SpiralGalaxy.Generators = class Generators {
       const lz = Math.sin(ang) * rr;
       const ly = (Math.random() - 0.5) * (rr * 0.3 + g.core * 0.6);
 
-      const dim = g.dwarf ? rand(0.8, 1.0) : rand(0.9, 1.2);
+      const dim = g.dwarf ? rand(0.8, 1.0) * g.bright : rand(0.9, 1.2) * g.bright;
       const cap = (x) => x > 1 ? 1 : x;
 
       return {
@@ -323,7 +344,7 @@ window.SpiralGalaxy.Generators = class Generators {
 
     return () => {
       const off = g.scale * 0.22;
-      const dim = g.dwarf ? 0.8 : rand(0.95, 1.15);
+      const dim = g.dwarf ? 0.8 * g.bright : rand(0.95, 1.15) * g.bright;
       const cap = (x) => x > 1 ? 1 : x;
       return {
         x: (Math.random() - 0.5) * off,
