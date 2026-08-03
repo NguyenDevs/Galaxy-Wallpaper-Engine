@@ -52,9 +52,26 @@ window.SpiralGalaxy.create = function create() {
   addPoints(companion, { ...P.companion, generator: generators.companion() });
 
   addPoints(engine.scene, { ...P.background, generator: generators.background() });
-  addPoints(engine.scene, { ...P.bgGalaxies, generator: generators.bgGalaxies() });
-  addPoints(engine.scene, { ...P.bgGlow, generator: generators.bgGlow() });
   addPoints(engine.scene, { ...P.fgStars, generator: generators.fgStars() });
+
+  const bgSpinGroups = [];
+  const bgSpin = Config.bgSpin;
+  for (const g of generators.bgGalaxiesList()) {
+    const outer = new THREE.Group();
+    outer.position.set(g.x, g.y, g.z);
+    outer.rotation.x = g.tiltX;
+    outer.rotation.z = g.tiltY;
+
+    const inner = new THREE.Group();
+    inner.userData.spin = g.spin;
+    outer.add(inner);
+
+    addPoints(inner, { ...P.bgGalaxies, generator: generators.bgGalaxy(g) });
+    addPoints(inner, { ...P.bgGlow, generator: generators.bgGalaxyGlow(g) });
+
+    engine.scene.add(outer);
+    bgSpinGroups.push(inner);
+  }
 
   const glow = new window.SpiralGalaxy.Glow({ texture: pointTex });
   const coreGlow = glow.createSprite({
@@ -96,6 +113,10 @@ window.SpiralGalaxy.create = function create() {
 
     for (const s of systems) {
       s.material.uniforms.uTime.value = elapsed;
+    }
+
+    for (const grp of bgSpinGroups) {
+      grp.rotation.y += bgSpin.speed * grp.userData.spin * dt;
     }
 
     engine.render();
