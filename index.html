@@ -415,16 +415,43 @@
       --clock-x: 4%;
       --clock-y: 50%;
       --clock-blur: 10px;
+      --clock-scale: 0.9;
+      --clock-color: #ffffff;
+      --clock-accent: #2f86d6;
+      --clock-accent-glow: rgba(47, 134, 214, 0.2);
+      --clock-bg-color: rgba(8, 8, 14, 0.4);
+      --clock-border-color: rgba(255, 255, 255, 0.1);
     }
     @media (min-width: 769px) {
       .timer-wrap {
         position: absolute;
         left: var(--clock-x) !important;
         top: var(--clock-y) !important;
-        transform: translateY(-50%) scale(0.9) !important;
+        transform: translateY(-50%) scale(var(--clock-scale)) !important;
         backdrop-filter: blur(var(--clock-blur)) !important;
         -webkit-backdrop-filter: blur(var(--clock-blur)) !important;
       }
+    }
+    .timer-wrap {
+      background: var(--clock-bg-color);
+    }
+    /* ---- Text color: numbers, ":" separators and ALL text ---- */
+    .timer-num, .clock-num, .clock-num--sec,
+    .timer-sep, .clock-b-sep,
+    .timer-total-num, .timer-total-label,
+    .timer-label-top, .timer-unit-label, .clock-b-lbl,
+    .clock-tag-label, .clock-b-day, .clock-b-date, .clock-tz-badge,
+    .clock-day-prog-label, .clock-day-prog-pct, .timer-progress-meta {
+      color: var(--clock-color);
+    }
+    .timer-num, .clock-num { border-color: var(--clock-border-color); }
+    /* ---- Accent color: progress bars, top line, flash border ---- */
+    .timer-progress-fill, .clock-day-prog-fill { background: var(--clock-accent); }
+    .ck-accent-line { background: linear-gradient(90deg, transparent, var(--clock-accent), transparent); }
+    .timer-num.flash, .clock-num.flash, .clock-num--sec.flash {
+      color: var(--clock-color);
+      border-color: var(--clock-accent);
+      box-shadow: 0 0 20px var(--clock-accent-glow);
     }
 </style>
 </head>
@@ -663,41 +690,71 @@
     updateClock();
   });
 
-  window.wallpaperPropertyListener = {
-    applyUserProperties: function(properties) {
-      if (properties.birthdate) { window.wallpaperConfig.birthDate = properties.birthdate.value; updateClock(); }
-      if (properties.timerlabeltop) document.getElementById('cfg-label-top').textContent = properties.timerlabeltop.value;
-      if (properties.timertotallabel) document.getElementById('cfg-label-total').textContent = properties.timertotallabel.value;
-      if (properties.yearlabeltext) { window.wallpaperConfig.yearLabelText = properties.yearlabeltext.value; updateClock(); }
-      if (properties.currenttimelabel) document.getElementById('cfg-label-current').textContent = properties.currenttimelabel.value;
-      if (properties.dayprogresslabel) document.getElementById('cfg-label-dayprog').textContent = properties.dayprogresslabel.value;
+  // ---- Lively Wallpaper native properties API ----
+  const lpProps = {};
 
-      const root = document.documentElement;
-      if (properties.clockoffsetx) root.style.setProperty('--clock-x', properties.clockoffsetx.value + '%');
-      if (properties.clockoffsety) root.style.setProperty('--clock-y', properties.clockoffsety.value + '%');
-      if (properties.clockblur) root.style.setProperty('--clock-blur', properties.clockblur.value + 'px');
+  function hexToRgba(hex, a) {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
+    if (!m) return 'rgba(47, 134, 214, ' + a + ')';
+    return 'rgba(' + parseInt(m[1], 16) + ', ' + parseInt(m[2], 16) + ', ' + parseInt(m[3], 16) + ', ' + a + ')';
+  }
 
-      if (properties.clockmode) window.wallpaperConfig.clockMode = parseInt(properties.clockmode.value);
-      if (properties.clockenable) {
-        window.wallpaperConfig.clockEnable = properties.clockenable.value;
-        document.querySelector('.timer-wrap').style.display = properties.clockenable.value ? '' : 'none';
-      }
-
-      const labels = ['year', 'month', 'day', 'hour', 'minute', 'second'];
-      labels.forEach(l => {
-        const prop = properties['label_' + l];
-        if (prop) {
+  function applyLivelyProperty(name, value) {
+    const root = document.documentElement;
+    switch (name) {
+      case 'birthdate': window.wallpaperConfig.birthDate = value; updateClock(); break;
+      case 'timerlabeltop': document.getElementById('cfg-label-top').textContent = value; break;
+      case 'timertotallabel': document.getElementById('cfg-label-total').textContent = value; break;
+      case 'yearlabeltext': window.wallpaperConfig.yearLabelText = value; updateClock(); break;
+      case 'currenttimelabel': document.getElementById('cfg-label-current').textContent = value; break;
+      case 'dayprogresslabel': document.getElementById('cfg-label-dayprog').textContent = value; break;
+      case 'clockoffsetx': root.style.setProperty('--clock-x', value + '%'); break;
+      case 'clockoffsety': root.style.setProperty('--clock-y', value + '%'); break;
+      case 'clockblur': root.style.setProperty('--clock-blur', value + 'px'); break;
+      case 'clockscale': root.style.setProperty('--clock-scale', (0.9 * parseFloat(value) / 100).toFixed(3)); break;
+      case 'clocktextcolor': root.style.setProperty('--clock-color', value); break;
+      case 'clockaccentcolor':
+        root.style.setProperty('--clock-accent', value);
+        root.style.setProperty('--clock-accent-glow', hexToRgba(value, 0.2));
+        break;
+      case 'clockbgopacity': root.style.setProperty('--clock-bg-color', 'rgba(8, 8, 14, ' + (parseFloat(value) / 100).toFixed(3) + ')'); break;
+      case 'clockmode': window.wallpaperConfig.clockMode = parseInt(value, 10); updateClock(); break;
+      case 'clockenable':
+        window.wallpaperConfig.clockEnable = !!value;
+        document.querySelector('.timer-wrap').style.display = value ? '' : 'none';
+        break;
+      default:
+        if (name.indexOf('label_') === 0) {
+          const l = name.substring(6);
           const char = (l === 'month' ? 'mo' : l.charAt(0));
-          const id = 'cfg-label-' + char;
-          const el = document.getElementById(id);
-          if (el) el.textContent = prop.value;
-
-          const elCurr = document.getElementById(id + '-curr');
-          if (elCurr) elCurr.textContent = prop.value;
+          const el = document.getElementById('cfg-label-' + char);
+          if (el) el.textContent = value;
+          const elCurr = document.getElementById('cfg-label-' + char + '-curr');
+          if (elCurr) elCurr.textContent = value;
         }
-      });
     }
-  };
+  }
+
+  function livelyPropertyListener(name, value) {
+    lpProps[name] = value;
+    applyLivelyProperty(name, value);
+    // Galaxy properties -> rebuild / live-apply via SpiralGalaxy runtime
+    if (window.SpiralGalaxy && window.SpiralGalaxy.applyWallpaperProperties) {
+      window.SpiralGalaxy.applyWallpaperProperties(lpProps);
+    }
+  }
+
+  // Lively native system listener (audio visualizer)
+  function livelySystemListener(name, value) {
+    if (name === 'audio') {
+      const audioData = value || [];
+      const combined = new Array(64);
+      for (let i = 0; i < 64; i++) {
+        combined[i] = Math.max(audioData[i] || 0, audioData[i + 64] || 0);
+      }
+      window._wallpaperAudioData = combined;
+    }
+  }
 
   if (window.wallpaperRegisterAudioListener) {
     window.wallpaperRegisterAudioListener(function(audioData) {
