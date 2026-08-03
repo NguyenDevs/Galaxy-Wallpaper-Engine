@@ -45,8 +45,9 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
 
   _trackVelocity(aVel, eVel) {
     const blend = Math.min(1, this._inertia.blendMs / Math.max(1, this._lastDragDt));
-    this._vAzimuth = this._vAzimuth * (1 - blend) + aVel * blend;
-    this._vElevation = this._vElevation * (1 - blend) + eVel * blend;
+    const gain = this._inertia.velocityGain || 1;
+    this._vAzimuth = this._vAzimuth * (1 - blend) + aVel * blend * gain;
+    this._vElevation = this._vElevation * (1 - blend) + eVel * blend * gain;
   }
 
   _stopInertia() {
