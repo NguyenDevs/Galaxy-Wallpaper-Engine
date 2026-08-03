@@ -75,24 +75,24 @@ window.SpiralGalaxy.Config = {
   },
 
   galaxyDust: {
-    count: 42,
-    radiusMin: 40,
-    radiusMax: 320,
-    scaleMin: 90,
-    scaleMax: 260,
-    opacityMin: 0.16,
-    opacityMax: 0.4,
-    tints: [0xff5bb8, 0xff8af0, 0x7df3ff, 0xc56bff, 0xff9ad0, 0x6bd8ff, 0xff7aa8, 0x9d8bff]
+    count: 80,
+    radiusMin: 30,
+    radiusMax: 400,
+    scaleMin: 130,
+    scaleMax: 360,
+    opacityMin: 0.18,
+    opacityMax: 0.42,
+    tints: [0x2fb0d8, 0x35c9d6, 0x3f9fd8, 0x6bd8ff, 0xff5bb8, 0xff4f7a, 0xff7aa8, 0xff6f9c]
   },
 
   nebulaField: {
-    count: 18,
-    radiusMin: 800,
-    radiusMax: 2000,
-    scaleMin: 400,
-    scaleMax: 1000,
-    opacityMin: 0.28,
-    opacityMax: 0.55,
-    tints: [0xff5bd0, 0x7a5cff, 0xff6f9c, 0x4fd8ff, 0x9d5bff, 0x34d9c8, 0xff8a4f]
+    count: 26,
+    radiusMin: 700,
+    radiusMax: 2100,
+    scaleMin: 500,
+    scaleMax: 1300,
+    opacityMin: 0.2,
+    opacityMax: 0.42,
+    tints: [0x2f9fd8, 0x35c9d6, 0x4fd8ff, 0x6bd8ff, 0xff4f7a, 0xff5bb8, 0xff6f9c]
   }
 };
