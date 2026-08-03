@@ -249,25 +249,25 @@ window.SpiralGalaxy.Generators = class Generators {
       ];
 
       const galaxies = [];
-      const N = 28;
+      const N = 14;
       for (let i = 0; i < N; i++) {
-        const radius = rand(820, 1550);
+        const radius = rand(700, 1250);
         const theta = rand(0, Math.PI * 2);
         const phi = Math.acos(rand(-1, 1));
-        const isDwarf = Math.random() < 0.28;
+        const isDwarf = Math.random() < 0.22;
         galaxies.push({
           x: radius * Math.sin(phi) * Math.cos(theta),
           y: radius * Math.cos(phi),
           z: radius * Math.sin(phi) * Math.sin(theta),
-          scale: isDwarf ? rand(14, 26) : rand(28, 62),
-          core: isDwarf ? rand(2.5, 4) : rand(4, 9),
+          scale: isDwarf ? rand(20, 36) : rand(45, 90),
+          core: isDwarf ? rand(3, 5) : rand(6, 12),
           arms: isDwarf ? 0 : 2 + Math.floor(Math.random() * 2),
-          twist: isDwarf ? 0 : rand(1.8, 3.4),
+          twist: isDwarf ? 0 : rand(2.0, 3.6),
           tiltX: rand(0, Math.PI),
           tiltY: rand(0, Math.PI),
           base: rand(0, Math.PI * 2),
-          scatter: isDwarf ? rand(0.5, 0.7) : rand(0.1, 0.35),
-          bulge: isDwarf ? 0.7 : 0.22,
+          scatter: isDwarf ? rand(0.5, 0.7) : rand(0.08, 0.3),
+          bulge: isDwarf ? 0.7 : 0.25,
           dwarf: isDwarf,
           color: galColors[Math.floor(Math.random() * galColors.length)]
         });
