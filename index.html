@@ -71,6 +71,7 @@
     backdrop-filter: blur(10px);
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    transform: scale(0.9);
     transition: all 0.5s ease;
   }
   .timer-label-top {
@@ -411,7 +412,7 @@
 </style>
 <style id="clock-styles">
     :root {
-      --clock-x: 10%;
+      --clock-x: 4%;
       --clock-y: 50%;
       --clock-blur: 10px;
     }
@@ -420,7 +421,7 @@
         position: absolute;
         left: var(--clock-x) !important;
         top: var(--clock-y) !important;
-        transform: translateY(-50%) !important;
+        transform: translateY(-50%) scale(0.9) !important;
         backdrop-filter: blur(var(--clock-blur)) !important;
         -webkit-backdrop-filter: blur(var(--clock-blur)) !important;
       }
