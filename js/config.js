@@ -25,9 +25,10 @@ window.SpiralGalaxy.Config = {
 
   controls: {
     enabled: true,
-    damping: 0.1,
+    damping: 0.4,
     stopSpeed: 0.015,
-    blendMs: 70
+    blendMs: 70,
+    velocityGain: 0.22
   },
 
   galaxy: {
