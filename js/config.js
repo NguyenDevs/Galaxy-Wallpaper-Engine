@@ -39,7 +39,6 @@ window.SpiralGalaxy.Config = {
   particles: {
     disk:       { count: 32000, sizeBase: 2.4, opacity: 0.95, twinkle: 0.06 },
     diskHaze:   { count: 20000, sizeBase: 4.6, opacity: 0.32, twinkle: 0.2 },
-    armGlow:    { count: 70,    sizeBase: 9,   opacity: 0.7,  twinkle: 0.1 },
     bar:        { count: 12000, sizeBase: 2.3, opacity: 0.95, twinkle: 0.1 },
     core:       { count: 9000,  sizeBase: 2.6, opacity: 1.0,  twinkle: 0.12 },
     halo:       { count: 5000,  sizeBase: 1.6, opacity: 0.5,  twinkle: 0.35 },
