@@ -9,6 +9,10 @@ window.SpiralGalaxy.GalaxyDust = class GalaxyDust {
     this._build();
   }
 
+  get meshes() {
+    return this._clouds;
+  }
+
   _build() {
     const { rand } = window.SpiralGalaxy.Random;
     const cfg = this._config;
@@ -19,14 +23,16 @@ window.SpiralGalaxy.GalaxyDust = class GalaxyDust {
       const ang = rand(0, Math.PI * 2);
       const thickness = rand(-46, 46) * (1 - r / radiusMax);
 
+      const tint = tints[Math.floor(Math.random() * tints.length)];
       const mat = new THREE.MeshBasicMaterial({
         map: this._texture,
-        color: tints[Math.floor(Math.random() * tints.length)],
+        color: tint,
         transparent: true,
         opacity: rand(opacityMin, opacityMax),
         depthWrite: false,
         blending: THREE.AdditiveBlending
       });
+      mat.userData.baseColor = new THREE.Color(tint);
 
       const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
       const scale = rand(scaleMin, scaleMax);
