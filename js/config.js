@@ -38,6 +38,9 @@ window.SpiralGalaxy.Config = {
 
   particles: {
     disk:       { count: 32000, sizeBase: 2.4, opacity: 0.95, twinkle: 0.06 },
+    diskHaze:   { count: 20000, sizeBase: 4.6, opacity: 0.32, twinkle: 0.2 },
+    armGlow:    { count: 70,    sizeBase: 9,   opacity: 0.7,  twinkle: 0.1 },
+    bar:        { count: 12000, sizeBase: 2.3, opacity: 0.95, twinkle: 0.1 },
     core:       { count: 9000,  sizeBase: 2.6, opacity: 1.0,  twinkle: 0.12 },
     halo:       { count: 5000,  sizeBase: 1.6, opacity: 0.5,  twinkle: 0.35 },
     companion:  { count: 1200,  sizeBase: 2.2, opacity: 0.6,  twinkle: 0.1 },
@@ -62,14 +65,14 @@ window.SpiralGalaxy.Config = {
   },
 
   galaxyDust: {
-    count: 20,
-    radiusMin: 60,
-    radiusMax: 265,
-    scaleMin: 80,
-    scaleMax: 210,
-    opacityMin: 0.1,
-    opacityMax: 0.26,
-    tints: [0xff5bb8, 0xff8af0, 0x7df3ff, 0xc56bff, 0xff9ad0, 0x6bd8ff]
+    count: 42,
+    radiusMin: 40,
+    radiusMax: 320,
+    scaleMin: 90,
+    scaleMax: 260,
+    opacityMin: 0.16,
+    opacityMax: 0.4,
+    tints: [0xff5bb8, 0xff8af0, 0x7df3ff, 0xc56bff, 0xff9ad0, 0x6bd8ff, 0xff7aa8, 0x9d8bff]
   },
 
   nebulaField: {
