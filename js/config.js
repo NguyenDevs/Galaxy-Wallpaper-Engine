@@ -47,14 +47,14 @@ window.SpiralGalaxy.Config = {
   },
 
   particles: {
-    disk:       { count: 32000, sizeBase: 2.4, opacity: 0.95, twinkle: 0.06 },
-    diskHaze:   { count: 20000, sizeBase: 4.6, opacity: 0.32, twinkle: 0.2 },
-    bar:        { count: 12000, sizeBase: 2.3, opacity: 0.95, twinkle: 0.1 },
-    core:       { count: 9000,  sizeBase: 2.6, opacity: 1.0,  twinkle: 0.12 },
-    halo:       { count: 5000,  sizeBase: 1.6, opacity: 0.5,  twinkle: 0.35 },
-    companion:  { count: 1200,  sizeBase: 2.2, opacity: 0.6,  twinkle: 0.1 },
+    disk:       { count: 32000, sizeBase: 2.4, opacity: 0.95, twinkle: 0.24 },
+    diskHaze:   { count: 20000, sizeBase: 4.6, opacity: 0.32, twinkle: 0.22 },
+    bar:        { count: 12000, sizeBase: 2.3, opacity: 0.95, twinkle: 0.26 },
+    core:       { count: 9000,  sizeBase: 2.6, opacity: 1.0,  twinkle: 0.28 },
+    halo:       { count: 5000,  sizeBase: 1.6, opacity: 0.5,  twinkle: 0.4 },
+    companion:  { count: 1200,  sizeBase: 2.2, opacity: 0.6,  twinkle: 0.26 },
     background: { count: 4000,  sizeBase: 2.2, opacity: 1.0,  twinkle: 0.5 },
-    bgGalaxies: { count: 900,   sizeBase: 4.5, opacity: 1.0,  twinkle: 0.08 },
+    bgGalaxies: { count: 900,   sizeBase: 4.5, opacity: 1.0,  twinkle: 0.32 },
     bgGlow:     { count: 6,     sizeBase: 11,  opacity: 0.5,  twinkle: 0 },
     fgStars:    { count: 1000,  sizeBase: 4.0, opacity: 1.0,  twinkle: 0.8 }
   },
