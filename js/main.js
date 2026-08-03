@@ -5,12 +5,14 @@ window.SpiralGalaxy.create = function create() {
 
   const engine = new window.SpiralGalaxy.Engine({
     container: document.body,
-    camera: Config.camera
+    camera: Config.camera,
+    post: Config.post
   });
 
   const random = window.SpiralGalaxy.Random;
   const ramp = new window.SpiralGalaxy.ColorRamp();
-  const pointTex = window.SpiralGalaxy.SpriteTexture.create(128, 0.35);
+  const pointTex = window.SpiralGalaxy.SpriteTexture.create(64, 0.3);
+  const cloudTex = window.SpiralGalaxy.NebulaField.makeTexture();
 
   const factory = new window.SpiralGalaxy.PointsFactory({
     texture: pointTex,
@@ -52,6 +54,20 @@ window.SpiralGalaxy.create = function create() {
   addPoints(engine.scene, { ...P.background, generator: generators.background() });
   addPoints(engine.scene, { ...P.bgGalaxies, generator: generators.bgGalaxies() });
   addPoints(engine.scene, { ...P.fgStars, generator: generators.fgStars() });
+
+  const glow = new window.SpiralGalaxy.Glow({ texture: pointTex });
+  const coreGlow = glow.createSprite({
+    color: Config.coreGlow.color,
+    size: Config.coreGlow.size,
+    opacity: Config.coreGlow.opacity
+  });
+  galaxy.add(coreGlow);
+
+  new window.SpiralGalaxy.GalaxyDust({
+    group: galaxy,
+    texture: cloudTex,
+    config: Config.galaxyDust
+  });
 
   new window.SpiralGalaxy.NebulaField({
     scene: engine.scene,
