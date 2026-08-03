@@ -110,9 +110,9 @@ window.SpiralGalaxy.Generators = class Generators {
       // blend base arm color toward the warm cluster color when close to a cluster
       const warmB = 0.85 + warm * 0.4;
       const warmBright = rand(0.75, 1.2);
-      let fr = cr * (1 - warm) + warmTint[0] * warmBright * warmB;
-      let fg = cg * (1 - warm) + warmTint[1] * warmBright * warmB;
-      let fb = cb * (1 - warm) + warmTint[2] * warmBright * warmB;
+      let fr = cr * (1 - warm) + warmTint[0] * warmBright * warmB * warm;
+      let fg = cg * (1 - warm) + warmTint[1] * warmBright * warmB * warm;
+      let fb = cb * (1 - warm) + warmTint[2] * warmBright * warmB * warm;
 
       const size = rand(0.7, 1.8) * (1 - 0.22 * (r / cfg.maxRadius)) * (1 + knotW * 1.0) * (1 + warm * 0.8);
 
