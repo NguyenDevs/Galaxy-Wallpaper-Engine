@@ -18,8 +18,7 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
     tint: { r: 1, g: 1, b: 1 },
     tintBg: false,
     particleSize: 1.0,
-    dragEnabled: true,
-    zoomEnabled: true
+    dragEnabled: true
   };
 
   function deepMerge(base, obj) {
@@ -86,7 +85,6 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
 
     // mouse interaction (live)
     live.dragEnabled = props.mousefollow !== false;
-    live.zoomEnabled = props.mousezoom !== false;
 
     eff = deepMerge(baseConfig, overrides);
   }
@@ -242,8 +240,7 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
       initial: Config.camera.start,
       inertia: Config.controls,
       offset: Config.camera.targetOffset,
-      drag: live.dragEnabled,
-      zoom: live.zoomEnabled
+      drag: live.dragEnabled
     });
 
     const clock = new THREE.Clock();
@@ -329,7 +326,6 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
     // zoom / camera distance
     if (C.controls) {
       if (C.controls.setDragEnabled) C.controls.setDragEnabled(live.dragEnabled);
-      if (C.controls.setZoomEnabled) C.controls.setZoomEnabled(live.zoomEnabled);
       C.controls.radius = Math.max(
         baseConfig.camera.limits.minRadius,
         Math.min(baseConfig.camera.limits.maxRadius, live.radius)
