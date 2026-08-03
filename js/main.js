@@ -53,6 +53,7 @@ window.SpiralGalaxy.create = function create() {
 
   addPoints(engine.scene, { ...P.background, generator: generators.background() });
   addPoints(engine.scene, { ...P.bgGalaxies, generator: generators.bgGalaxies() });
+  addPoints(engine.scene, { ...P.bgGlow, generator: generators.bgGlow() });
   addPoints(engine.scene, { ...P.fgStars, generator: generators.fgStars() });
 
   const glow = new window.SpiralGalaxy.Glow({ texture: pointTex });
