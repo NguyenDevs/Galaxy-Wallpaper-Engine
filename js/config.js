@@ -6,7 +6,7 @@ window.SpiralGalaxy.Config = {
     near: 0.1,
     far: 5000,
     start: { azimuth: 0.0, elevation: 0.35, radius: 660 },
-    targetOffset: 0.12,
+    targetOffset: 70,
     limits: {
       minElevation: -1.2,
       maxElevation: 1.3,
