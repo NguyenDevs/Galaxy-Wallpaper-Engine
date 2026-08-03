@@ -173,17 +173,12 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     this._dragEnabled = !!value;
   }
 
-  setZoomEnabled(value) {
-    this._zoomEnabled = !!value;
-  }
-
   dispose() {
     this._stopInertia();
     const el = this._element;
     el.removeEventListener('mousedown', this._onPointerDown);
     window.removeEventListener('mouseup', this._onPointerUp);
     window.removeEventListener('mousemove', this._onPointerMove);
-    window.removeEventListener('wheel', this._onWheel);
     el.removeEventListener('touchstart', this._onTouchStart);
     el.removeEventListener('touchmove', this._onTouchMove);
     el.removeEventListener('touchend', this._onTouchEnd);
