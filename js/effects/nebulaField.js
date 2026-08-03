@@ -85,14 +85,16 @@ window.SpiralGalaxy.NebulaField = (() => {
         const theta = rand(0, Math.PI * 2);
         const phi = Math.acos(rand(-1, 1));
 
+        const tint = cfg.tints[Math.floor(Math.random() * cfg.tints.length)];
         const mat = new THREE.MeshBasicMaterial({
           map: this._texture,
-          color: cfg.tints[Math.floor(Math.random() * cfg.tints.length)],
+          color: tint,
           transparent: true,
           opacity: rand(cfg.opacityMin, cfg.opacityMax),
           depthWrite: false,
           blending: THREE.AdditiveBlending
         });
+        mat.userData.baseColor = new THREE.Color(tint);
 
         const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
         const scale = rand(cfg.scaleMin, cfg.scaleMax);
@@ -107,6 +109,10 @@ window.SpiralGalaxy.NebulaField = (() => {
         this._scene.add(mesh);
         this._clouds.push(mesh);
       }
+    }
+
+    get meshes() {
+      return this._clouds;
     }
   }
 
