@@ -344,30 +344,33 @@ window.SpiralGalaxy.Generators = class Generators {
   _bgList() {
     if (!this._bgListData) {
       const { rand } = this._random;
+      // natural galaxy light palette: bright white, ivory, yellow, pink, red, blue, orange...
       const galPalettes = [
-        [1.25, 0.62, 1.15],
-        [0.82, 0.7, 1.3],
-        [0.62, 0.9, 1.3],
-        [0.6, 1.2, 1.15],
-        [1.3, 0.95, 0.55],
-        [1.3, 0.55, 0.8],
-        [0.7, 1.05, 1.3],
-        [1.2, 0.75, 1.0],
-        [0.85, 1.25, 0.7],
-        [1.05, 0.65, 1.3]
+        [1.15, 1.1, 1.0],      // bright white
+        [1.05, 0.98, 0.82],    // ivory white
+        [1.2, 1.05, 0.72],     // warm yellow-white
+        [1.18, 0.98, 0.55],    // yellowish
+        [1.1, 0.55, 0.85],     // pink
+        [1.2, 0.5, 0.6],       // red
+        [1.2, 0.68, 0.5],      // orange-red
+        [0.6, 0.78, 1.2],      // blue
+        [0.45, 0.6, 1.25],     // deep blue
+        [0.55, 0.9, 1.2],      // cyan-blue
+        [0.75, 0.62, 1.2],     // violet-blue
+        [1.1, 0.85, 0.5]       // warm orange
       ];
 
       const galaxies = [];
-      const N = 16;
-      const MIN_SEP = 330;
+      const N = 24;
+      const MIN_SEP = 460;
       for (let i = 0; i < N; i++) {
-        const isDwarf = Math.random() < 0.25;
+        const isDwarf = Math.random() < 0.3;
         const pal = galPalettes[Math.floor(Math.random() * galPalettes.length)];
-        const jitter = (v) => Math.min(1.45, v * rand(0.88, 1.2));
+        const jitter = (v) => Math.min(1.45, v * rand(0.82, 1.25));
 
         let x, y, z, accepted = false;
-        for (let attempt = 0; attempt < 24 && !accepted; attempt++) {
-          const radius = rand(800, 1850);
+        for (let attempt = 0; attempt < 40 && !accepted; attempt++) {
+          const radius = rand(850, 2400);
           const theta = rand(0, Math.PI * 2);
           const phi = Math.acos(rand(-1, 1));
           x = radius * Math.sin(phi) * Math.cos(theta);
@@ -382,10 +385,15 @@ window.SpiralGalaxy.Generators = class Generators {
           }
         }
 
+        // closer to the main galaxy -> bigger, farther -> smaller
+        const distScale = 1500 / Math.sqrt(x * x + y * y + z * z);
+        const sizeMul = isDwarf ? rand(0.35, 0.55) : rand(0.8, 1.25);
+        const scale = sizeMul * distScale * 70;
+
         galaxies.push({
           x, y, z,
-          scale: isDwarf ? rand(16, 48) : rand(35, 115),
-          core: isDwarf ? rand(2.5, 4.5) : rand(5, 14),
+          scale,
+          core: scale * (isDwarf ? rand(0.08, 0.12) : rand(0.12, 0.17)),
           arms: isDwarf ? 0 : 2 + Math.floor(Math.random() * 2),
           wind: isDwarf ? 0 : rand(0.7, 1.2),
           tiltX: rand(0, Math.PI),
@@ -393,12 +401,12 @@ window.SpiralGalaxy.Generators = class Generators {
           base: rand(0, Math.PI * 2),
           barAngle: rand(0, Math.PI),
           scatter: isDwarf ? rand(0.5, 0.7) : rand(0.08, 0.18),
-          bulge: isDwarf ? 0.7 : 0.2,
+          bulge: isDwarf ? 0.7 : rand(0.18, 0.28),
           barFrac: isDwarf ? 0 : rand(0.16, 0.24),
           armFrac: isDwarf ? 0 : rand(0.5, 0.62),
           dwarf: isDwarf,
           spin: isDwarf ? rand(0.1, 0.25) : rand(0.5, 1.0),
-          bright: rand(0.85, 1.3),
+          bright: rand(0.85, 1.35),
           color: [jitter(pal[0]), jitter(pal[1]), jitter(pal[2])]
         });
       }
@@ -429,7 +437,7 @@ window.SpiralGalaxy.Generators = class Generators {
           x: Math.cos(ang) * rr,
           y: gauss() * (rr * 0.55 + g.core * 0.8),
           z: Math.sin(ang) * rr,
-          r: cap(pr * fall), g: cap(pg * fall), b: cap(pb * fall),
+          r: cap(pr * g.color[0] * fall), g: cap(pg * g.color[1] * fall), b: cap(pb * g.color[2] * fall),
           size: rand(1.3, 2.5),
           phase: rand(0, Math.PI * 2)
         };
@@ -447,7 +455,7 @@ window.SpiralGalaxy.Generators = class Generators {
           x: Math.cos(ang) * rr,
           y: gauss() * (rr * 0.7 + g.core * 0.7),
           z: Math.sin(ang) * rr,
-          r: cap(pr * boost), g: cap(pg * boost), b: cap(pb * boost),
+          r: cap(pr * g.color[0] * boost), g: cap(pg * g.color[1] * boost), b: cap(pb * g.color[2] * boost),
           size: rand(1.4, 2.7),
           phase: rand(0, Math.PI * 2)
         };
@@ -463,7 +471,7 @@ window.SpiralGalaxy.Generators = class Generators {
         const fall = (1 - Math.abs(bx) / barHalf * 0.4) * g.bright * rand(0.95, 1.2);
         return {
           x: bx * c - bz * s, y: by, z: bx * s + bz * c,
-          r: cap(pr * fall), g: cap(pg * fall), b: cap(pb * fall),
+          r: cap(pr * g.color[0] * fall), g: cap(pg * g.color[1] * fall), b: cap(pb * g.color[2] * fall),
           size: rand(1.3, 2.5),
           phase: rand(0, Math.PI * 2)
         };
@@ -511,7 +519,7 @@ window.SpiralGalaxy.Generators = class Generators {
         x: Math.cos(ang) * rr,
         y: gauss() * (rr * 0.26 + g.core * 0.5),
         z: Math.sin(ang) * rr,
-        r: cap(mx * fall * j), g: cap(my * fall * j), b: cap(mb * fall * j),
+        r: cap(mx * g.color[0] * fall * j), g: cap(my * g.color[1] * fall * j), b: cap(mb * g.color[2] * fall * j),
         size: rand(1.2, 2.6),
         phase: rand(0, Math.PI * 2)
       };
