@@ -1,13 +1,14 @@
 window.SpiralGalaxy = window.SpiralGalaxy || {};
 
 window.SpiralGalaxy.OrbitControls = class OrbitControls {
-  constructor({ element, camera, target, limits, initial, sensitivity, inertia }) {
+  constructor({ element, camera, target, limits, initial, sensitivity, inertia, offset }) {
     this._element = element;
     this._camera = camera;
     this._target = target || new THREE.Vector3();
     this._limits = limits;
     this._sensitivity = sensitivity || { orbit: 0.004, zoom: 0.4, touchOrbit: 0.006 };
     this._inertia = inertia || { enabled: false, damping: 0.08, stopSpeed: 0.0004, blendMs: 45 };
+    this._offset = offset || 0;
 
     this.azimuth = initial.azimuth;
     this.elevation = initial.elevation;
@@ -41,6 +42,9 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
       this.radius * c * Math.cos(this.azimuth) + this._target.z
     );
     this._camera.lookAt(this._target);
+    // offset the camera to the left (proportional to zoom) so the galaxy sits
+    // off-center to the right, like ND-Wallpaper-Engine's core view
+    this._camera.position.x -= this.radius * this._offset;
   }
 
   _trackVelocity(aVel, eVel) {
