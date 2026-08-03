@@ -14,6 +14,15 @@ window.SpiralGalaxy.Config = {
     }
   },
 
+  post: {
+    bloom: {
+      enabled: true,
+      strength: 1.2,
+      radius: 0.75,
+      threshold: 0.45
+    }
+  },
+
   galaxy: {
     arms: 3,
     armTwist: 3.1,
@@ -28,27 +37,44 @@ window.SpiralGalaxy.Config = {
   },
 
   particles: {
-    disk:       { count: 26000, sizeBase: 3.2, opacity: 0.95, twinkle: 0.06 },
-    core:       { count: 8000,  sizeBase: 3.4, opacity: 1.0,  twinkle: 0.12 },
-    halo:       { count: 5000,  sizeBase: 2.0, opacity: 0.45, twinkle: 0.35 },
-    companion:  { count: 900,   sizeBase: 2.6, opacity: 0.55, twinkle: 0.1 },
-    background: { count: 3500,  sizeBase: 7.0, opacity: 1.0,  twinkle: 0.5 },
-    bgGalaxies: { count: 5000,  sizeBase: 5.5, opacity: 0.8,  twinkle: 0.15 },
-    fgStars:    { count: 900,   sizeBase: 7.5, opacity: 1.0,  twinkle: 0.8 }
+    disk:       { count: 32000, sizeBase: 2.4, opacity: 0.95, twinkle: 0.06 },
+    core:       { count: 9000,  sizeBase: 2.6, opacity: 1.0,  twinkle: 0.12 },
+    halo:       { count: 5000,  sizeBase: 1.6, opacity: 0.5,  twinkle: 0.35 },
+    companion:  { count: 1200,  sizeBase: 2.2, opacity: 0.6,  twinkle: 0.1 },
+    background: { count: 4000,  sizeBase: 2.2, opacity: 1.0,  twinkle: 0.5 },
+    bgGalaxies: { count: 9000,  sizeBase: 2.8, opacity: 0.9,  twinkle: 0.15 },
+    fgStars:    { count: 1000,  sizeBase: 4.0, opacity: 1.0,  twinkle: 0.8 }
   },
 
   companion: {
     position: [260, 140, -80]
   },
 
+  coreGlow: {
+    size: 240,
+    opacity: 0.9,
+    color: 0xffe6c4
+  },
+
+  galaxyDust: {
+    count: 20,
+    radiusMin: 60,
+    radiusMax: 265,
+    scaleMin: 80,
+    scaleMax: 210,
+    opacityMin: 0.1,
+    opacityMax: 0.26,
+    tints: [0xff5bb8, 0xff8af0, 0x7df3ff, 0xc56bff, 0xff9ad0, 0x6bd8ff]
+  },
+
   nebulaField: {
-    count: 14,
+    count: 18,
     radiusMin: 800,
-    radiusMax: 1900,
+    radiusMax: 2000,
     scaleMin: 400,
-    scaleMax: 900,
-    opacityMin: 0.25,
-    opacityMax: 0.5,
-    tints: [0x7a5cff, 0xff6f9c, 0x4fd8ff, 0x8b6cff]
+    scaleMax: 1000,
+    opacityMin: 0.28,
+    opacityMax: 0.55,
+    tints: [0xff5bd0, 0x7a5cff, 0xff6f9c, 0x4fd8ff, 0x9d5bff, 0x34d9c8, 0xff8a4f]
   }
 };
