@@ -52,7 +52,7 @@ window.SpiralGalaxy.PointsFactory = class PointsFactory {
           vColor = color * tw;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           float dist = -mvPosition.z;
-          gl_PointSize = aSize * uSizeBase * uPixelRatio * (300.0 / dist);
+          gl_PointSize = aSize * uSizeBase * uPixelRatio * (320.0 / dist);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
