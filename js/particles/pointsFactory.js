@@ -48,7 +48,9 @@ window.SpiralGalaxy.PointsFactory = class PointsFactory {
         uniform float uTime;
         uniform float uTwinkle;
         void main() {
-          float tw = 1.0 - uTwinkle * (0.5 - 0.5 * sin(uTime * 2.5 + aPhase));
+          float s1 = sin(uTime * 2.6 + aPhase);
+          float s2 = sin(uTime * 5.1 + aPhase * 2.3);
+          float tw = 1.0 + uTwinkle * (0.62 * s1 * s1 * s1 + 0.38 * s2);
           vColor = color * tw;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           float dist = -mvPosition.z;
