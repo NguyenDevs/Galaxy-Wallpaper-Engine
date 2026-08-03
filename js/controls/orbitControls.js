@@ -1,7 +1,7 @@
 window.SpiralGalaxy = window.SpiralGalaxy || {};
 
 window.SpiralGalaxy.OrbitControls = class OrbitControls {
-  constructor({ element, camera, target, limits, initial, sensitivity, inertia, offset }) {
+  constructor({ element, camera, target, limits, initial, sensitivity, inertia, offset, drag, zoom }) {
     this._element = element;
     this._camera = camera;
     this._target = target || new THREE.Vector3();
@@ -9,6 +9,8 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     this._sensitivity = sensitivity || { orbit: 0.004, zoom: 0.4, touchOrbit: 0.006 };
     this._inertia = inertia || { enabled: false, damping: 0.08, stopSpeed: 0.0004, blendMs: 45 };
     this._offset = offset || 0;
+    this._dragEnabled = drag !== undefined ? !!drag : true;
+    this._zoomEnabled = zoom !== undefined ? !!zoom : true;
     if (this._offset) {
       // shift the orbit/zoom pivot to the LEFT of the galaxy (in world units),
       // so the galaxy sits offset right and zoom focuses on a point left of it
@@ -104,6 +106,7 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     const sens = this._sensitivity;
 
     this._onPointerDown = (e) => {
+      if (!this._dragEnabled) return;
       this._stopInertia();
       this._isDragging = true;
       this._lastX = e.clientX;
@@ -131,11 +134,13 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
       this.apply();
     };
     this._onWheel = (e) => {
+      if (!this._zoomEnabled) return;
       this._stopInertia();
       this.radius += e.deltaY * sens.zoom;
       this.apply();
     };
     this._onTouchStart = (e) => {
+      if (!this._dragEnabled) return;
       this._stopInertia();
       if (e.touches.length === 1) {
         this._touchLastX = e.touches[0].clientX;
@@ -170,6 +175,14 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     el.addEventListener('touchstart', this._onTouchStart, { passive: true });
     el.addEventListener('touchmove', this._onTouchMove, { passive: true });
     el.addEventListener('touchend', this._onTouchEnd, { passive: true });
+  }
+
+  setDragEnabled(value) {
+    this._dragEnabled = !!value;
+  }
+
+  setZoomEnabled(value) {
+    this._zoomEnabled = !!value;
   }
 
   dispose() {
