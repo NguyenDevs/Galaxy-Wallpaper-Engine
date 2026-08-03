@@ -1,0 +1,21 @@
+{
+  "AppVersion": "2.0.0.0",
+  "Title": "Spiral Galaxy - Live Clock",
+  "Desc": "Interactive 3D spiral galaxy with a fully customizable live clock. Tune galaxy color, brightness, zoom, position, particle amount and the clock layout from Lively properties.",
+  "Author": "Galaxy Wallpaper Engine",
+  "Type": "web",
+  "FileName": "index.html",
+  "Arguments": null,
+  "IsAbsolutePath": false,
+  "Thumbnail": "",
+  "Preview": "",
+  "Tags": [
+    "space",
+    "galaxy",
+    "clock",
+    "abstract",
+    "threejs"
+  ],
+  "Version": 1,
+  "Id": null
+}
