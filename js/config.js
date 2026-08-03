@@ -51,7 +51,7 @@ window.SpiralGalaxy.Config = {
     diskHaze:   { count: 20000, sizeBase: 4.6, opacity: 0.32, twinkle: 0.22 },
     bar:        { count: 12000, sizeBase: 2.3, opacity: 0.95, twinkle: 0.26 },
     core:       { count: 9000,  sizeBase: 2.6, opacity: 1.0,  twinkle: 0.28 },
-    halo:       { count: 5000,  sizeBase: 1.6, opacity: 0.5,  twinkle: 0.4 },
+    halo:       { count: 22000, sizeBase: 2.8, opacity: 0.4,  twinkle: 0.28 },
     companion:  { count: 1200,  sizeBase: 2.2, opacity: 0.6,  twinkle: 0.26 },
     background: { count: 4000,  sizeBase: 2.2, opacity: 1.0,  twinkle: 0.5 },
     bgGalaxies: { count: 900,   sizeBase: 4.5, opacity: 1.0,  twinkle: 0.32 },
