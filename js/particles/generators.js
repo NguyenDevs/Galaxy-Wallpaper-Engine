@@ -236,66 +236,82 @@ window.SpiralGalaxy.Generators = class Generators {
     };
   }
 
+  _bgList() {
+    if (!this._bgListData) {
+      const { rand } = this._random;
+      const galColors = [
+        [1.0, 0.86, 0.96],
+        [0.93, 0.85, 1.05],
+        [0.84, 0.9, 1.05],
+        [0.96, 0.9, 1.0],
+        [0.86, 0.96, 1.03],
+        [1.0, 0.9, 0.86]
+      ];
+
+      const galaxies = [];
+      const N = 28;
+      for (let i = 0; i < N; i++) {
+        const radius = rand(820, 1550);
+        const theta = rand(0, Math.PI * 2);
+        const phi = Math.acos(rand(-1, 1));
+        const isDwarf = Math.random() < 0.28;
+        galaxies.push({
+          x: radius * Math.sin(phi) * Math.cos(theta),
+          y: radius * Math.cos(phi),
+          z: radius * Math.sin(phi) * Math.sin(theta),
+          scale: isDwarf ? rand(14, 26) : rand(28, 62),
+          core: isDwarf ? rand(2.5, 4) : rand(4, 9),
+          arms: isDwarf ? 0 : 2 + Math.floor(Math.random() * 2),
+          twist: isDwarf ? 0 : rand(1.8, 3.4),
+          tiltX: rand(0, Math.PI),
+          tiltY: rand(0, Math.PI),
+          base: rand(0, Math.PI * 2),
+          scatter: isDwarf ? rand(0.5, 0.7) : rand(0.1, 0.35),
+          bulge: isDwarf ? 0.7 : 0.22,
+          dwarf: isDwarf,
+          color: galColors[Math.floor(Math.random() * galColors.length)]
+        });
+      }
+      this._bgListData = galaxies;
+    }
+    return this._bgListData;
+  }
+
+  _rotateLocal(lx, ly, lz, tiltX, tiltY) {
+    const y1 = ly * Math.cos(tiltX) - lz * Math.sin(tiltX);
+    const z1 = ly * Math.sin(tiltX) + lz * Math.cos(tiltX);
+    const x2 = lx * Math.cos(tiltY) + z1 * Math.sin(tiltY);
+    const z2 = -lx * Math.sin(tiltY) + z1 * Math.cos(tiltY);
+    return [x2, y1, z2];
+  }
+
   bgGalaxies() {
     const { rand, gauss } = this._random;
-    const galColors = [
-      [1.05, 0.8, 1.05],
-      [0.75, 0.85, 1.05],
-      [1.05, 0.78, 0.92],
-      [0.78, 0.95, 1.05],
-      [1.05, 0.92, 0.72],
-      [0.95, 0.75, 1.1]
-    ];
-
-    const galaxies = [];
-    const N = 46;
-    for (let i = 0; i < N; i++) {
-      const radius = rand(900, 1900);
-      const theta = rand(0, Math.PI * 2);
-      const phi = Math.acos(rand(-1, 1));
-      galaxies.push({
-        x: radius * Math.sin(phi) * Math.cos(theta),
-        y: radius * Math.cos(phi),
-        z: radius * Math.sin(phi) * Math.sin(theta),
-        scale: rand(16, 46),
-        core: rand(3, 6),
-        arms: 2 + Math.floor(Math.random() * 2),
-        twist: rand(2.0, 4.0),
-        tiltX: rand(0, Math.PI),
-        tiltY: rand(0, Math.PI),
-        base: rand(0, Math.PI * 2),
-        scatter: rand(0.12, 0.4),
-        color: galColors[Math.floor(Math.random() * galColors.length)]
-      });
-    }
-
-    const rotate = (lx, ly, lz, tiltX, tiltY) => {
-      const y1 = ly * Math.cos(tiltX) - lz * Math.sin(tiltX);
-      const z1 = ly * Math.sin(tiltX) + lz * Math.cos(tiltX);
-      const x2 = lx * Math.cos(tiltY) + z1 * Math.sin(tiltY);
-      const z2 = -lx * Math.sin(tiltY) + z1 * Math.cos(tiltY);
-      return [x2, y1, z2];
-    };
+    const galaxies = this._bgList();
 
     return () => {
       const g = galaxies[Math.floor(Math.random() * galaxies.length)];
 
       let rr, ang;
-      if (Math.random() < 0.3) {
-        rr = Math.pow(Math.random(), 2.2) * g.core;
+      const r = Math.random();
+      if (r < g.bulge) {
+        rr = Math.pow(Math.random(), 2.0) * g.core;
         ang = rand(0, Math.PI * 2);
-      } else {
+      } else if (g.arms > 0) {
         const arm = Math.floor(rand(0, g.arms));
-        rr = Math.pow(Math.random(), 0.95) * g.scale;
+        rr = Math.pow(Math.random(), 0.85) * g.scale;
         ang = g.base + arm * ((Math.PI * 2) / g.arms) + rr * g.twist + gauss() * g.scatter;
+      } else {
+        rr = Math.pow(Math.random(), 1.4) * g.scale;
+        ang = rand(0, Math.PI * 2);
       }
 
       const lx = Math.cos(ang) * rr;
       const lz = Math.sin(ang) * rr;
-      const ly = (rand() - 0.5) * (rr * 0.35 + g.core);
-      const [ox, oy, oz] = rotate(lx, ly, lz, g.tiltX, g.tiltY);
-      const dim = rand(0.85, 1.2);
+      const ly = (rand() - 0.5) * (rr * 0.4 + g.core);
+      const [ox, oy, oz] = this._rotateLocal(lx, ly, lz, g.tiltX, g.tiltY);
 
+      const dim = g.dwarf ? rand(0.75, 0.95) : rand(0.85, 1.15);
       const cap = (x) => x > 1 ? 1 : x;
 
       return {
@@ -303,7 +319,41 @@ window.SpiralGalaxy.Generators = class Generators {
         y: g.y + oy,
         z: g.z + oz,
         r: cap(g.color[0] * dim), g: cap(g.color[1] * dim), b: cap(g.color[2] * dim),
-        size: rand(0.6, 1.5),
+        size: rand(1.1, 2.2),
+        phase: rand(0, Math.PI * 2)
+      };
+    };
+  }
+
+  bgGlow() {
+    const { rand } = this._random;
+    const galaxies = this._bgList();
+    const blobs = [];
+    for (const g of galaxies) {
+      const n = 3;
+      for (let i = 0; i < n; i++) {
+        const off = g.scale * 0.5;
+        blobs.push({
+          x: g.x + (rand() - 0.5) * off,
+          y: g.y + (rand() - 0.5) * off,
+          z: g.z + (rand() - 0.5) * off,
+          size: rand(1.7, 3.4) * (0.6 + g.scale / 40),
+          color: g.color,
+          dwarf: g.dwarf
+        });
+      }
+    }
+
+    return () => {
+      const b = blobs[Math.floor(Math.random() * blobs.length)];
+      const dim = b.dwarf ? 0.65 : rand(0.8, 1.0);
+      const cap = (x) => x > 1 ? 1 : x;
+      return {
+        x: b.x,
+        y: b.y,
+        z: b.z,
+        r: cap(b.color[0] * dim), g: cap(b.color[1] * dim), b: cap(b.color[2] * dim),
+        size: b.size,
         phase: rand(0, Math.PI * 2)
       };
     };
