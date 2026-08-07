@@ -7,6 +7,9 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
   let current = null;
   let engine = null; // persistent renderer/composer reused across rebuilds
   let rafId = 0;
+  let pendingBuild = null;
+  let lastProps = {}; // last Lively property set, reused after WebGL context restore
+  let trackedTextures = []; // CPU textures that live in uniforms (leak unless disposed)
 
   // Live (non-generation) tweaks applied without a rebuild.
   const live = {
@@ -50,7 +53,15 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
   }
 
   function rebuildFromConfig(props) {
-    const num = (v, def) => (v === undefined || v === null || v === '') ? def : parseFloat(v);
+    // Never let a malformed Lively value become NaN: NaN radius/brightness/tint
+    // silently produces a black, unrecoverable render.
+    const num = (v, def) => {
+      const n = parseFloat(v);
+      return (v === undefined || v === null || v === '' || !isFinite(n)) ? def : n;
+    };
+    const toBool = (v, def) =>
+      v === true || v === 'true' || v === 1 || v === '1' ? true :
+      v === false || v === 'false' || v === 0 || v === '0' ? false : def;
     const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
     // ---- Generation-scoped settings (need a rebuild) ----
@@ -81,10 +92,10 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
     // galaxy color tint (live)
     const tint = hextoRgb(props.galaxycolor);
     live.tint = tint;
-    live.tintBg = props.galaxytintbg ? !!props.galaxytintbg : false;
+    live.tintBg = toBool(props.galaxytintbg, false);
 
     // mouse interaction (live)
-    live.dragEnabled = props.mousefollow !== false;
+    live.dragEnabled = toBool(props.mousefollow, true);
 
     eff = deepMerge(baseConfig, overrides);
   }
@@ -116,6 +127,14 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
         engine.scene.remove(engine.scene.children[0]);
       }
     }
+    // Uniform-only textures (uTexture sprites) are not owned by any material.map,
+    // so dispose them explicitly to keep GPU memory from growing across rebuilds.
+    for (const t of trackedTextures) {
+      if (t && t.dispose) {
+        try { t.dispose(); } catch (err) {}
+      }
+    }
+    trackedTextures = [];
     current = null;
   }
 
@@ -141,6 +160,20 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
         camera: Config.camera,
         post: Config.post
       });
+      engine.setContextCallbacks({
+        onLost: () => {
+          cancelAnimationFrame(rafId);
+          rafId = 0;
+        },
+        onRestored: () => {
+          // The WebGL context came back; GPU resources are gone. Rebuild the
+          // whole scene on a fresh renderer so everything re-uploads cleanly.
+          setTimeout(() => {
+            dispose();
+            rebuildNow();
+          }, 60);
+        }
+      });
     }
     C.engine = engine;
 
@@ -148,6 +181,7 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
     const ramp = new window.SpiralGalaxy.ColorRamp();
     const pointTex = window.SpiralGalaxy.SpriteTexture.create(64, 0.3);
     const cloudTex = window.SpiralGalaxy.NebulaField.makeTexture();
+    trackedTextures.push(pointTex, cloudTex);
 
     const factory = new window.SpiralGalaxy.PointsFactory({
       texture: pointTex,
@@ -257,21 +291,30 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
 
     function animate() {
       rafId = requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), 0.05);
-      elapsed += dt;
+      try {
+        const dt = Math.min(clock.getDelta(), 0.05);
+        elapsed += dt;
 
-      galaxy.rotation.y += eff.galaxy.rotationSpeed * dt;
-      halo.rotation.y += eff.galaxy.rotationSpeed * eff.galaxy.haloRotationFactor * dt;
-      companion.rotation.y += eff.galaxy.rotationSpeed * eff.galaxy.companionRotationFactor * dt;
+        galaxy.rotation.y += eff.galaxy.rotationSpeed * dt;
+        halo.rotation.y += eff.galaxy.rotationSpeed * eff.galaxy.haloRotationFactor * dt;
+        companion.rotation.y += eff.galaxy.rotationSpeed * eff.galaxy.companionRotationFactor * dt;
 
-      for (const s of systems) {
-        s.material.uniforms.uTime.value = elapsed;
+        for (const s of systems) {
+          s.material.uniforms.uTime.value = elapsed;
+        }
+        for (const grp of bgSpinGroups) {
+          grp.rotation.y += Config.bgSpin.speed * grp.userData.spin * dt;
+        }
+
+        engine.render();
+      } catch (err) {
+        // A single failed frame (e.g. mid context-loss) must not permanently
+        // stop the loop; the context-lost handler tears down and rebuilds.
+        if (!window.SpiralGalaxy._frameErrorLogged) {
+          window.SpiralGalaxy._frameErrorLogged = true;
+          console.error('[SpiralGalaxy] frame error:', err);
+        }
       }
-      for (const grp of bgSpinGroups) {
-        grp.rotation.y += Config.bgSpin.speed * grp.userData.spin * dt;
-      }
-
-      engine.render();
     }
     animate();
   }
@@ -343,6 +386,15 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
   // ------------------- Public API --------------------------
   let lastGenKey = null;
 
+  // Rebuild immediately using the current effective config (used after a
+  // WebGL context restore, where we must recreate every GPU resource).
+  function rebuildNow() {
+    if (pendingBuild) { clearTimeout(pendingBuild); pendingBuild = null; }
+    build();
+    lastGenKey = genKey();
+    applyLive();
+  }
+
   // Only generation-scoped settings require a rebuild. Everything else is
   // applied live, so rebuilds (and new renderers) stay rare.
   function genKey() {
@@ -351,6 +403,7 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
 
   window.SpiralGalaxy.create = function () {
     rebuildFromConfig({});
+    lastProps = {};
     build();
     lastGenKey = genKey();
     window.SpiralGalaxy.applyLive();
@@ -359,10 +412,10 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
   window.SpiralGalaxy.applyLive = applyLive;
 
   // Called by the Lively Wallpaper property listener.
-  let pendingBuild = null;
   window.SpiralGalaxy.applyWallpaperProperties = function (props, forceBuild) {
+    lastProps = props || {};
     const prevKey = lastGenKey;
-    rebuildFromConfig(props || {});
+    rebuildFromConfig(lastProps);
 
     const nowKey = genKey();
     const needBuild = forceBuild || nowKey !== prevKey || !current;
