@@ -24,6 +24,11 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     this._vElevation = 0;
     this._inertiaRaf = null;
 
+    this._isDragging = false;
+    this._activePointerId = null;
+
+    if (this._element.style) this._element.style.touchAction = 'none';
+
     this._bind();
     this.apply();
   }
@@ -104,21 +109,25 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
     const el = this._element;
     const sens = this._sensitivity;
 
+    // Pointer Events with pointer capture: pointerup is guaranteed to be
+    // delivered to the canvas even when the pointer leaves the window, so a
+    // missed release can never leave the controls permanently "dragging".
     this._onPointerDown = (e) => {
       if (!this._dragEnabled) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
       this._stopInertia();
       this._isDragging = true;
+      this._activePointerId = e.pointerId;
       this._lastX = e.clientX;
       this._lastY = e.clientY;
       this._lastDragTime = performance.now();
       this._lastDragDt = 16;
-    };
-    this._onPointerUp = () => {
-      this._isDragging = false;
-      this._startInertia();
+      try {
+        if (el.setPointerCapture) el.setPointerCapture(e.pointerId);
+      } catch (err) {}
     };
     this._onPointerMove = (e) => {
-      if (!this._isDragging) return;
+      if (!this._isDragging || e.pointerId !== this._activePointerId) return;
       const now = performance.now();
       const dt = now - this._lastDragTime;
       this._lastDragDt = Math.max(4, dt);
@@ -127,60 +136,77 @@ window.SpiralGalaxy.OrbitControls = class OrbitControls {
       const dy = e.clientY - this._lastY;
       this._lastX = e.clientX;
       this._lastY = e.clientY;
-      this.azimuth -= dx * sens.orbit;
-      this.elevation += dy * sens.orbit;
-      this._trackVelocity(-dx * sens.orbit * 1000 / dt, dy * sens.orbit * 1000 / dt);
+      const k = e.pointerType === 'touch' ? sens.touchOrbit : sens.orbit;
+      this.azimuth -= dx * k;
+      this.elevation += dy * k;
+      this._trackVelocity(-dx * k * 1000 / dt, dy * k * 1000 / dt);
       this.apply();
     };
-    this._onTouchStart = (e) => {
-      if (!this._dragEnabled) return;
+    this._onPointerUp = (e) => {
+      if (e.pointerId !== this._activePointerId) return;
+      this._isDragging = false;
+      this._activePointerId = null;
+      this._releaseCapture(e.pointerId);
+      this._startInertia();
+    };
+    this._onPointerCancel = (e) => {
+      if (e.pointerId !== this._activePointerId) return;
+      this._isDragging = false;
+      this._activePointerId = null;
+      this._releaseCapture(e.pointerId);
       this._stopInertia();
-      if (e.touches.length === 1) {
-        this._touchLastX = e.touches[0].clientX;
-        this._touchLastY = e.touches[0].clientY;
-        this._lastDragTime = performance.now();
-        this._lastDragDt = 16;
-      }
     };
-    this._onTouchMove = (e) => {
-      if (e.touches.length !== 1) return;
-      const now = performance.now();
-      const dt = now - this._lastDragTime;
-      this._lastDragDt = Math.max(4, dt);
-      this._lastDragTime = now;
-      const dx = e.touches[0].clientX - this._touchLastX;
-      const dy = e.touches[0].clientY - this._touchLastY;
-      this._touchLastX = e.touches[0].clientX;
-      this._touchLastY = e.touches[0].clientY;
-      this.azimuth -= dx * sens.touchOrbit;
-      this.elevation += dy * sens.touchOrbit;
-      this._trackVelocity(-dx * sens.touchOrbit * 1000 / dt, dy * sens.touchOrbit * 1000 / dt);
-      this.apply();
+    this._onLostCapture = (e) => {
+      if (e.pointerId !== this._activePointerId) return;
+      this._isDragging = false;
+      this._activePointerId = null;
+      this._stopInertia();
     };
-    this._onTouchEnd = (e) => {
-      if (e.touches.length === 0) this._startInertia();
+    // Another window (e.g. the Lively settings panel) stole focus: a mouseup
+    // may never reach us, so reset the drag state instead of leaving it stuck.
+    this._onBlur = () => {
+      if (!this._isDragging) return;
+      this._isDragging = false;
+      this._activePointerId = null;
+      this._stopInertia();
     };
 
-    el.addEventListener('mousedown', this._onPointerDown);
-    window.addEventListener('mouseup', this._onPointerUp);
-    window.addEventListener('mousemove', this._onPointerMove);
-    el.addEventListener('touchstart', this._onTouchStart, { passive: true });
-    el.addEventListener('touchmove', this._onTouchMove, { passive: true });
-    el.addEventListener('touchend', this._onTouchEnd, { passive: true });
+    el.addEventListener('pointerdown', this._onPointerDown);
+    window.addEventListener('pointermove', this._onPointerMove);
+    window.addEventListener('pointerup', this._onPointerUp);
+    window.addEventListener('pointercancel', this._onPointerCancel);
+    el.addEventListener('lostpointercapture', this._onLostCapture);
+    window.addEventListener('blur', this._onBlur);
+  }
+
+  _releaseCapture(pointerId) {
+    const el = this._element;
+    if (pointerId === null || pointerId === undefined) return;
+    try {
+      if (el.releasePointerCapture && el.hasPointerCapture && el.hasPointerCapture(pointerId)) {
+        el.releasePointerCapture(pointerId);
+      }
+    } catch (err) {}
   }
 
   setDragEnabled(value) {
     this._dragEnabled = !!value;
+    if (!this._dragEnabled) {
+      this._isDragging = false;
+      this._activePointerId = null;
+      this._stopInertia();
+    }
   }
 
   dispose() {
     this._stopInertia();
+    this._releaseCapture(this._activePointerId);
     const el = this._element;
-    el.removeEventListener('mousedown', this._onPointerDown);
-    window.removeEventListener('mouseup', this._onPointerUp);
-    window.removeEventListener('mousemove', this._onPointerMove);
-    el.removeEventListener('touchstart', this._onTouchStart);
-    el.removeEventListener('touchmove', this._onTouchMove);
-    el.removeEventListener('touchend', this._onTouchEnd);
+    el.removeEventListener('pointerdown', this._onPointerDown);
+    window.removeEventListener('pointermove', this._onPointerMove);
+    window.removeEventListener('pointerup', this._onPointerUp);
+    window.removeEventListener('pointercancel', this._onPointerCancel);
+    el.removeEventListener('lostpointercapture', this._onLostCapture);
+    window.removeEventListener('blur', this._onBlur);
   }
 };
