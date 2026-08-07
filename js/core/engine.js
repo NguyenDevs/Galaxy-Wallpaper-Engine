@@ -3,6 +3,7 @@ window.SpiralGalaxy = window.SpiralGalaxy || {};
 window.SpiralGalaxy.Engine = class Engine {
   constructor({ container, camera: cameraCfg, post }) {
     this._post = post || {};
+    this._contextCallbacks = { onLost: null, onRestored: null };
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -21,7 +22,22 @@ window.SpiralGalaxy.Engine = class Engine {
 
     this._onResize = () => this.resize();
     window.addEventListener('resize', this._onResize);
+
+    this._onContextLost = (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      if (this._contextCallbacks.onLost) this._contextCallbacks.onLost();
+    };
+    this._onContextRestored = () => {
+      if (this._contextCallbacks.onRestored) this._contextCallbacks.onRestored();
+    };
+    this.renderer.domElement.addEventListener('webglcontextlost', this._onContextLost, false);
+    this.renderer.domElement.addEventListener('webglcontextrestored', this._onContextRestored, false);
+
     this.resize();
+  }
+
+  setContextCallbacks(callbacks) {
+    this._contextCallbacks = callbacks || {};
   }
 
   _setupComposer() {
@@ -53,6 +69,9 @@ window.SpiralGalaxy.Engine = class Engine {
   resize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
+    // Guard against 0-sized windows (e.g. while Lively resizes the wallpaper);
+    // zero-size render targets make the bloom pass output black frames.
+    if (!isFinite(w) || !isFinite(h) || w <= 0 || h <= 0) return;
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
@@ -72,6 +91,11 @@ window.SpiralGalaxy.Engine = class Engine {
 
   dispose() {
     window.removeEventListener('resize', this._onResize);
+
+    if (this.renderer && this.renderer.domElement) {
+      this.renderer.domElement.removeEventListener('webglcontextlost', this._onContextLost);
+      this.renderer.domElement.removeEventListener('webglcontextrestored', this._onContextRestored);
+    }
 
     this.scene.traverse((o) => {
       if (o.geometry) o.geometry.dispose();
